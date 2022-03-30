@@ -38,18 +38,14 @@
                 
         return link_list
         
+# How to run the scraper class:
         
-        
-scraper = Amazon_UK_Scraper("Most Wished For", "Computer & Accessories")
+scraper = Amazon_UK_Scraper("Most Wished For", "Computer & Accessories") # The input could be "Most Wished For" or "Best Seller"
 scraper.set_driver_url()
 scraper.accept_cookies()
 links = scraper.get_all_links() # The get all links method uses the get links_on_a_page function and the get all links function mainly justs appends the links to a 
 # main list and clicks on the next button to obtain the same data on the next page.
 ```
-
-> The following image shows the accept cookies and get url methods of our Amazon scraper class:
-
-![image](https://user-images.githubusercontent.com/51030860/160943266-9b170a87-cfcc-4dd4-ad4c-de04fa294b5d.png)
 
 
 ## Milestone 2
