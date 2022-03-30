@@ -1,6 +1,6 @@
 # Data-Collection-Pipeline
 
-> This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up with the latest market trends.
+> This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up with the latest market trends. We only experiment with the Computer & Accessories category but just by changing the url in the scraper, we can get the data for any other desired category.
 
 ## Milestone 1
 
