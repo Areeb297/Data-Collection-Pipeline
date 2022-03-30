@@ -4,15 +4,53 @@
 
 ## Milestone 1
 
-- Answer some of these questions in the next few bullet points. What have you built? What technologies have you used? Why have you used those?
-
-- Example: The FastAPI framework allows for fast and easy construction of APIs and is combined with pydantic, which is used to assert the data types of all incoming data to allow for easier processing later on. The server is ran locally using uvicorn, a library for ASGI server implementation.
+- The Amazon scraper firstly visits the amazon webpage, locates and accepts the cookies button using its XPATH, and then based on the input of the user (best seller, most wished), visits the specific URL, scrolls down to the bottom of the page until all products of that particular page are shown, finds and appends the links of every product to a main list, clicks on the next button and repeats the same steps. Shown below is a code snippet of the steps the code goes through when getting the links on a page. Additionally, we show how the methods are used in order to acquire all the links.
   
 ```python
-"""Insert your code here"""
+
+    def get_links_on_a_page(self):
+        
+        link_list = []
+        try:
+            next_button = self.driver.find_element(by=By.XPATH, value='//li[@class="a-last"]')
+            next_button.location_once_scrolled_into_view
+            time.sleep(1)
+            prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="p13n-gridRow _p13n-zg-list-grid-desktop_style_grid-row__3Cywl"]')
+            prop_list = prop_container.find_elements(by=By.XPATH, value='./div')
+            
+        except:
+            print("Last page of products")
+            previous_button = self.driver.find_element(by=By.XPATH, value='//li[@class="a-normal"]')
+            time.sleep(1)
+            
+            # As the Next button is not visible anymore due it being the last page, we search for the previous button
+            # Until that button is displayed, we keep scrolling to display all products on that given page
+            
+            previous_button.location_once_scrolled_into_view
+            time.sleep(1)
+            prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="p13n-gridRow _p13n-zg-list-grid-desktop_style_grid-row__3Cywl"]')
+            prop_list = prop_container.find_elements(by=By.XPATH, value='./div')
+           
+        for property in prop_list:
+                a_tag = property.find_element(by=By.TAG_NAME, value='a')
+                link = a_tag.get_attribute('href')
+                link_list.append(link)
+                
+        return link_list
+        
+        
+        
+scraper = Amazon_UK_Scraper("Most Wished For", "Computer & Accessories")
+scraper.set_driver_url()
+scraper.accept_cookies()
+links = scraper.get_all_links() # The get all links method uses the get links_on_a_page function and the get all links function mainly justs appends the links to a 
+# main list and clicks on the next button to obtain the same data on the next page.
 ```
 
-> Insert an image/screenshot of what you have built so far here.
+> The following image shows the accept cookies and get url methods of our Amazon scraper class:
+
+![image](https://user-images.githubusercontent.com/51030860/160943266-9b170a87-cfcc-4dd4-ad4c-de04fa294b5d.png)
+
 
 ## Milestone 2
 
