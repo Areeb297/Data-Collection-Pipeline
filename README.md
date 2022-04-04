@@ -55,8 +55,7 @@ Within this milestone, we retrieve all the product data and save it in dictionar
 ```bash
     for i, img_link in enumerate(prop_dict['Image link']):
         # download the image
-        urllib.request.urlretrieve(img_link, str(i)+'.jpg') # With each image link, we downloading its corresponding image and name it with the index of the image link 
-                                                            # e.g., the 2nd image link will be 2.jpg
+        urllib.request.urlretrieve(img_link, str(i)+'.jpg') # With each image link, we downloading its corresponding image and name it with the index of the image link e.g., the 2nd image link will be 2.jpg
 ```
 
 A code snippet of the function that retrieves details from a product webpage along with the functions to output the uuid and unique ID are shown below. Moreover, we show how the dictionary is first converted to a dataframe and then dumped as a json file in the raw_data directory
