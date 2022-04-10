@@ -101,7 +101,8 @@ A code snippet of the function that retrieves details from a product webpage alo
 ```
 
 Below is a screenshot of the dataframe obtained after scraping 3 product webpages, particularly the best sellers in the Computer & Accessories section.
-> ![image](https://user-images.githubusercontent.com/51030860/161623165-5fdff401-3a8a-43f9-a348-4c160df630de.png)
+> ![image]![image](https://user-images.githubusercontent.com/51030860/162643812-1ad33b30-42e6-4e81-97d5-327504758582.png)
+
 
 ## Milestone n
 
