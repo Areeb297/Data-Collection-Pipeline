@@ -1,10 +1,11 @@
-# Finding information about best sellers and most wished for in a given section say computers and accessories in the UK Amazon Store
-# Based on selection, obtaining best seller data for the requested product such as laptops etc
+# Import all packages
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
 from selenium.webdriver.support.ui import WebDriverWait  
 from selenium.webdriver.support import expected_conditions as EC
+from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 import uuid
 from selenium.common.exceptions import NoSuchElementException
@@ -12,7 +13,7 @@ import os
 import pandas as pd
 import json
 import urllib
-
+from pydantic import validate_arguments
 
 
 
@@ -54,8 +55,7 @@ class Amazon_UK_Scraper():
             url (str): The URL of the webpage to perform webscraping on
         
         """
-        self.driver = ChromeDriverManager().install() # Get the latest version of Chrome Driver Manager
-        self.driver = webdriver.Chrome() 
+        self.driver = webdriver.Chrome(ChromeDriverManager().install()) # Get the latest version of Chrome Driver Manager
         self.driver.get(url)
             
             
@@ -449,13 +449,6 @@ if __name__ == '__main__':
         
 
             
-    
-    
-        
-    
-        
-        
-
     
     
         
