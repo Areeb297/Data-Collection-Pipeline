@@ -89,7 +89,7 @@ Below is a screenshot of the dataframe obtained after scraping 3 product webpage
 
 ## Milestone 3
 
-- In this milestone, we added docstrings to our class methods using Google's recommended form of documentation and created a testing file which performs integration and unit testing such as checking we are using a specific chromedriver version or that there are no null values for price of a product which can be seen in the code snippet below:
+In this milestone, we added docstrings to our class methods using Google's recommended form of documentation and created a testing file which performs integration and unit testing such as checking we are using a specific chromedriver version or that there are no null values for price of a product which can be seen in the code snippet below:
 
 ```python
 
