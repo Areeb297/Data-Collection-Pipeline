@@ -10,9 +10,14 @@ class Scraper_Test(unittest.TestCase):
         self.scrap_1 = Amazon_UK_Scraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
 
     def test_version_inputs(self):
-        # This test method checks which driver version we expect our Scraper to run with, verifies that cookies were accepted
-        # and additionally checks that the category of products are correctly passed
-        # i.e., Most Wished For products on the Amazon UK store
+        
+        """
+        This test method checks which driver version we expect our Scraper to run with, verifies that cookies were accepted
+        and additionally checks that the category of products are correctly passed
+        i.e., Most Wished For products on the Amazon UK store
+
+        """
+
         expected_value = '101.0.4951.41' # Driver we worked with
         actual_value = self.scrap_1.__dict__['driver'].__dict__['caps']['browserVersion']
         # Assert statement to check expected and actual are the same values
@@ -31,17 +36,20 @@ class Scraper_Test(unittest.TestCase):
         self.assertEqual('most wished for', self.scrap_1.__dict__['options'])
 
     def test_links_dict_images_format(self):
+        
+        """"
+        This method tests 6 things - namely: 
+         1) Whether the number of links we obtain are above a certain number (we use 20 as an example) to ensure our public method of get_all_links is working correctly. 
+         2) Checks if the Price column of the product dataframe does not contain any null values as every product has a price listed
+         3) Checks no duplicate rows are present in the dataframe as we have unique Product ID and UUIDs present so we essentially test these methods.
+         4) Assert that the number of unique UUID values in our dataframe is equal to the number of rows in our dataframe - just to further check the UUID method
+         5) Assert or check that a value in the UUID column has 36 characters as we used uuid4
+         6) Test whether our Unique Product ID column has values only of 9 characters
+         7) Ensures that the number of unique Unique Product ID values are the same as the number of rows of our dataframe - similar to UUID
+         8) Lastly, we test whether the images we obtain are of JPEG format as we saved the images as '.jpg'
+        If all these tests are satisfied, then we can be sure all of our methods of our scraper class are working correctly
 
-        # This method tests 6 things - namely: 
-        # 1) Whether the number of links we obtain are above a certain number (we use 20 as an example) to ensure our public method of get_all_links is working correctly. 
-        # 2) Checks if the Price column of the product dataframe does not contain any null values as every product has a price listed
-        # 3) Checks no duplicate rows are present in the dataframe as we have unique Product ID and UUIDs present so we essentially test these methods.
-        # 4) Assert that the number of unique UUID values in our dataframe is equal to the number of rows in our dataframe - just to further check the UUID method
-        # 5) Assert or check that a value in the UUID column has 36 characters as we used uuid4
-        # 6) Test whether our Unique Product ID column has values only of 9 characters
-        # 7) Ensures that the number of unique Unique Product ID values are the same as the number of rows of our dataframe - similar to UUID
-        # 8) Lastly, we test whether the images we obtain are of JPEG format as we saved the images as '.jpg'
-        # If all these tests are satisfied, then we can be sure all of our methods of our scraper class are working correctly
+        """
 
         self.scrap_1.accept_cookies()
         self.scrap_1.change_region()
