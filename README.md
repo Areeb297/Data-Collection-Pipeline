@@ -43,7 +43,7 @@ A code snippet of the function that retrieves details from a product webpage alo
 
 ```python
 
-      product_id = value[value.find('pd_rd_i')+8: -6] # The .find method locates the first index of the required unique ID and the actual characters are found 8  characters after
+    product_id = value[value.find('pd_rd_i')+8: -6] # The .find method locates the first index of the required unique ID and the actual characters are found 8  characters after
     
     
     def v4_uuid(self):
