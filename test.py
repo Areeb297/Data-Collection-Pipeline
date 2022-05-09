@@ -28,6 +28,7 @@ class Scraper_Test(unittest.TestCase):
         # successfully
         try:
             self.scrap_1.find_element(by=By.XPATH, value='//span[@class="a-button a-button-primary"]') 
+            val = True
         except:
             val = False
         self.assertFalse(val)
