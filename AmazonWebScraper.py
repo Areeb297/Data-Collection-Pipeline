@@ -435,15 +435,15 @@ if __name__ == '__main__':
     scraper.set_driver_url("https://www.amazon.co.uk/" )
     scraper.accept_cookies()
 
-    links = scraper.get_all_links()
-    product_dictionary = scraper.prod_dict(links, 3)
+    prod_links = scraper.get_all_links()
+    product_dictionary = scraper.prod_dict(prod_links, 5) # Get information about 5 products
     scraper.create_change_dir()
     scraper.dump_json_image_upload(product_dictionary)
 
     # Go back to the parent directory to be able to use other methods in the future
 
-    path_parent = os.path.dirname(os.getcwd())
-    os.chdir(path_parent)
+    parent_directory = os.path.dirname(os.getcwd())
+    os.chdir(parent_directory)
 
 
 
