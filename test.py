@@ -10,7 +10,7 @@ class Scraper_Test(unittest.TestCase):
         self.scrap_1 = Amazon_UK_Scraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
 
     def test_version_inputs(self):
-        
+
         """
         This test method checks which driver version we expect our Scraper to run with, verifies that cookies were accepted
         and additionally checks that the category of products are correctly passed
@@ -66,7 +66,7 @@ class Scraper_Test(unittest.TestCase):
         self.assertEqual(df['UUID'].nunique(), df.shape[0]) # Test 4
         # Check whether the value of UUID has 36 characters
         self.assertEqual(len(df['UUID'][2]), 36) # Test 5
-        
+
         self.assertEqual(len(df['Unique Product ID'][3]), 9) # Test 6
 
         self.assertEqual(df['Unique Product ID'].nunique(), df.shape[0]) # Test 7
@@ -79,7 +79,7 @@ class Scraper_Test(unittest.TestCase):
             print("Directory does not exist")
             os.mkdir("raw_data")
             os.chdir('raw_data')
-            
+
         self.scrap_1.dump_json_image_upload(prop_dict)
         # Check whether the images in the directory are JPEG
         with Image.open('1.jpg') as image:
@@ -89,8 +89,8 @@ class Scraper_Test(unittest.TestCase):
         for _ in range(2):
             path_parent = os.path.dirname(os.getcwd())
             os.chdir(path_parent)
-        
-        
+
+
 
     def tearDown(self):
         # This method tears down or exists the scraper/driver
