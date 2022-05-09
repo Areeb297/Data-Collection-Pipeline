@@ -436,9 +436,9 @@ if __name__ == '__main__':
     scraper.accept_cookies()
 
     links = scraper.get_all_links()
-    prop_dict = scraper.prod_dict(links, 3)
+    product_dictionary = scraper.prod_dict(links, 3)
     scraper.create_change_dir()
-    scraper.dump_json_image_upload(prop_dict)
+    scraper.dump_json_image_upload(product_dictionary)
 
     # Go back to the parent directory to be able to use other methods in the future
 
