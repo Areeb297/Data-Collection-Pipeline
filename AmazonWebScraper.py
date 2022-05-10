@@ -185,7 +185,8 @@ class Amazon_UK_Scraper():
         return big_list
 
 
-    def unique_id_gen(self, url):
+    @staticmethod
+    def unique_id_gen(url):
 
         """
         This function takes in the URL of a product webpage and returns the unique product id. For example, the format 'pd_rd_i=XXXXXXXXX&psc=N'
@@ -206,7 +207,8 @@ class Amazon_UK_Scraper():
 
 
 
-    def v4_uuid(self):
+    @staticmethod
+    def v4_uuid():
 
         """
         This function generates a unique uuid for every link using the uuid package
@@ -312,7 +314,8 @@ class Amazon_UK_Scraper():
 
 
 
-    def create_change_dir(self):
+    @staticmethod
+    def create_change_dir():
 
         """
         This method creates a directory called "raw_data" and changes the current directory
