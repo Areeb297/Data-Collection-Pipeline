@@ -5,12 +5,11 @@ import uuid
 import json
 import urllib
 import os
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait  
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
@@ -56,12 +55,11 @@ class AmazonUKScraper():
 
         """
 
-        time.sleep(1)
         try: # if cookies present
             self.driver.find_element(by=By.XPATH, value='//span[@class="a-button a-button-primary"]').click()
             time.sleep(1)
 
-        except:
+        except NoSuchElementException:
             pass
         
     def change_region(self):
@@ -74,7 +72,9 @@ class AmazonUKScraper():
         # This scraper only works for products delivered to regions in the UK
         # First lets check whether scraper is used in the UK and if so avoid using the steps in this method
         region = input("Are you in the UK: ")
+        time.sleep(1)
         if str(region).lower() == "no":
+            time.sleep(1)
             self.driver.find_element(by=By.XPATH, value='//div[@id="nav-global-location-slot"]').click() # Locate the region button and click
 
             time.sleep(1)
@@ -194,7 +194,7 @@ class AmazonUKScraper():
                 element.click()
                 time.sleep(1)
 
-            except:
+            except NoSuchElementException:
                 break
 
 
@@ -262,14 +262,20 @@ class AmazonUKScraper():
         # Price of the product
         try:
             price = self.driver.find_element(By.XPATH, '//span[@class="a-size-base a-color-price"]').text
-        except:
+        except NoSuchElementException:
             price = 'N/A'  # Different products have prices shown on different locations (normally it could be three places, hence we use the try except statement)
 
         if price == 'N/A':
             try:
                 price = self.driver.find_element(By.XPATH, '//span[@class="a-price aok-align-center reinventPricePriceToPayMargin priceToPay"]').text.replace('\n', '.')
-            except:
+            except NoSuchElementException:
+                price = 'N/A'
+
+        if price == 'N/A':
+            try:
                 price = self.driver.find_element(By.XPATH, '//td[@class="a-span12"]').text
+            except NoSuchElementException:
+                price = 'N/A'
 
         # Similar to price, we find the same problems with Brand, Voucher, Promotion and hence we perform multiple try except statements
 
@@ -289,14 +295,14 @@ class AmazonUKScraper():
         try:
             price_override = self.driver.find_element(By.XPATH, '//span[@class="a-size-large a-color-price savingPriceOverride aok-align-center reinventPriceSavingsPercentageMargin savingsPercentage"]').text
 
-        except:
+        except NoSuchElementException:
             price_override = 'N/A'
 
         if price_override == 'N/A':
             try:
                 price_override = self.driver.find_element(By.XPATH, '//td[@class="a-span12 a-color-price a-size-base\
                                                   priceBlockSavingsString"]').text
-            except:
+            except NoSuchElementException:
                 price_override = 'N/A'
 
 
@@ -315,7 +321,10 @@ class AmazonUKScraper():
         global_ratings = self.driver.find_element(By.XPATH, '//div[@data-hook="total-review-count"]').text
 
         # Review topics
-        topics_review = self.driver.find_element(By.XPATH, '//div[@data-hook="lighthut-terms-list"]').text
+        try:
+            topics_review = self.driver.find_element(By.XPATH, '//div[@data-hook="lighthut-terms-list"]').text
+        except NoSuchElementException:
+            topics_review = 'N/A'
 
         # Most helpful review
         review_helpful = self.driver.find_element(By.XPATH, '//div[@class="a-section review aok-relative"]').text
