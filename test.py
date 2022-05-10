@@ -18,7 +18,7 @@ class Scraper_Test(unittest.TestCase):
 
         """
 
-        expected_value = '101.0.4951.41' # Driver we worked with where one can change this if needed 
+        expected_value = '101.0.4951.54' # Driver we worked with where one can change this if needed 
         actual_value = self.scrap_1.__dict__['driver'].__dict__['caps']['browserVersion']
         # Assert statement to check expected and actual are the same values
         self.assertEqual(expected_value, actual_value)
@@ -60,7 +60,7 @@ class Scraper_Test(unittest.TestCase):
         # Convert the dict into a dataframe and check the price column has no NaNs by converting to type float (if NaN value would be string N/A and
         #  hence will result in error)
         df = pd.DataFrame(prop_dict)
-        self.assertGreater(df['Price'].astype(float).sum(), 5) # Test 2
+        self.assertGreater(df['Price'].str.replace('£', '').astype(float).sum(), 5) # Test 2
         # Check there are no duplicate rows in our dataframe obtained from converting the dictionary from the prod_dict method to a dataframe
         self.assertEqual(df.duplicated().sum(), 0) # Test 3
 
@@ -68,7 +68,7 @@ class Scraper_Test(unittest.TestCase):
         # Check whether the value of UUID has 36 characters
         self.assertEqual(len(df['UUID'][2]), 36) # Test 5
 
-        self.assertEqual(len(df['Unique Product ID'][3]), 9) # Test 6
+        self.assertEqual(len(df['Unique Product ID'][3]), 10) # Test 6
 
         self.assertEqual(df['Unique Product ID'].nunique(), df.shape[0]) # Test 7
         # Check the type of images generated
