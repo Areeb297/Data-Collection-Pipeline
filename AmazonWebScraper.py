@@ -132,10 +132,10 @@ class Amazon_UK_Scraper():
 
         link_list = []
 
-        for property in container_elements:
-                a_tag = property.find_element(by=By.TAG_NAME, value='a') # Locate the <a> tag to retrieve the href link of the product
-                link = a_tag.get_attribute('href')
-                link_list.append(link)
+        for property_prod in container_elements:
+            a_tag = property_prod.find_element(by=By.TAG_NAME, value='a') # Locate the <a> tag to retrieve the href link of the product
+            link = a_tag.get_attribute('href')
+            link_list.append(link)
 
         return link_list
 
