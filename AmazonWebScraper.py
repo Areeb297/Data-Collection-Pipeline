@@ -1,28 +1,30 @@
 # Import all packages
 
+import time
+import uuid
+import json
+import urllib
+import os
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
-import time
 from selenium.webdriver.support.ui import WebDriverWait  
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import uuid
-import os
 import pandas as pd
-import json
-import urllib
 from pydantic import validate_arguments
 
 
 
 
-class Amazon_UK_Scraper(): 
+class AmazonUKScraper(): 
 
     """
 
-    This class is used to scrape types of product from the Amazon UK store for the best seller and most wished for product categories
+    This class is used to scrape types of product from the Amazon UK store for 
+    the best seller and most wished for product categories
 
     Attributes:
 
@@ -36,11 +38,11 @@ class Amazon_UK_Scraper():
 
     @validate_arguments
     def __init__(self, options, items, url: str): 
-
+        
         """
         See help(Amazon_UK_Scraper) for details
         """
-
+      
         self.options = options.lower() # To keep text consistent
         self.items = items.lower() # To keep text consistent
         self.driver = webdriver.Chrome(ChromeDriverManager().install()) # Get the latest version of Chrome Driver Manager
@@ -61,14 +63,15 @@ class Amazon_UK_Scraper():
 
         except:
             pass
-
+        
     def change_region(self):
-
+    
         """
         This method ensures the region is set to the UK when accessing this scraper in a different country as this scraper only works within the UK region
         """
 
-        # We need to check whether region is set to the UK as that is important - This scraper only works for products delivered to regions in the UK
+        # We need to check whether region is set to the UK as that is important 
+        # This scraper only works for products delivered to regions in the UK
         # First lets check whether scraper is used in the UK and if so avoid using the steps in this method
         region = input("Are you in the UK: ")
         if str(region).lower() == "no":
@@ -110,12 +113,12 @@ class Amazon_UK_Scraper():
         try:
             time.sleep(1)
             next_button = self.driver.find_element(by=By.XPATH, value='//li[@class="a-last"]')
-            next_button.location_once_scrolled_into_view # Scrolls and waits until the next button appears in view to the scraper
+            next_button.location_once_scrolled_into_view   # Scrolls and waits until the next button appears in view to the scraper
             time.sleep(1)
             prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="p13n-gridRow _cDEzb_grid-row_3Cywl"]')
             prop_list = prop_container.find_elements(by=By.XPATH, value='./div[@id="gridItemRoot"]')
 
-        except:
+        except NoSuchElementException:
             time.sleep(1)
             previous_button = self.driver.find_element(by=By.XPATH, value='//li[@class="a-normal"]')
             time.sleep(1)
@@ -211,7 +214,6 @@ class Amazon_UK_Scraper():
         Returns:
             str: The string representation of the product ID given in the url argument.
         """
-
 
         product_id = url[url.find('pd_rd_i')+8: -6]     # The .find method locates the first index of the required 
                                                         # unique ID and the actual characters are found 8 characters after
@@ -443,7 +445,7 @@ class Amazon_UK_Scraper():
 if __name__ == '__main__':
 
 
-    scraper = Amazon_UK_Scraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
+    scraper = AmazonUKScraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
     scraper.accept_cookies()
     scraper.change_region()
 
