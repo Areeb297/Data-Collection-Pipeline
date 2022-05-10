@@ -1,13 +1,17 @@
 import unittest
-from AmazonWebScraper import Amazon_UK_Scraper
+from AmazonWebScraper import AmazonUKScraper
 import pandas as pd
 from PIL import Image
 import os
 from selenium.webdriver.common.by import By
 
-class Scraper_Test(unittest.TestCase):
+
+class ScraperTest(unittest.TestCase):
+    """
+    This test class ensures all public methods of the AmazonUKScraper Class work as expected
+    """
     def setUp(self):
-        self.scrap_1 = Amazon_UK_Scraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
+        self.scrap_1 = AmazonUKScraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
 
     def test_version_inputs(self):
 
