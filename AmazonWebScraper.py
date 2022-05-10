@@ -443,9 +443,9 @@ class Amazon_UK_Scraper():
 if __name__ == '__main__':
 
 
-    scraper = Amazon_UK_Scraper("Best Seller", "Computer & Accessories")
-    scraper.set_driver_url("https://www.amazon.co.uk/" )
+    scraper = Amazon_UK_Scraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
     scraper.accept_cookies()
+    scraper.change_region()
 
     prod_links = scraper.get_all_links()
     product_dictionary = scraper.prod_dict(prod_links, 5) # Get information about 5 products
