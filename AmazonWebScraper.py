@@ -166,7 +166,7 @@ class Amazon_UK_Scraper():
 
         big_list = []
 
-        for i in range(2): # 2 pages of products for every category in the best sellers or most wished section
+        for _ in range(2): # 2 pages of products for every category in the best sellers or most wished section
 
             prop_links = self.find_container_elements()
             l = self.get_links_per_page(prop_links)
@@ -421,10 +421,6 @@ class Amazon_UK_Scraper():
             except:
                 print("Image already exists")
 
-        # Go back to the parent directory
-
-        path_parent = os.path.dirname(os.getcwd())
-        os.chdir(path_parent)
 
 
 
@@ -440,10 +436,11 @@ if __name__ == '__main__':
     scraper.create_change_dir()
     scraper.dump_json_image_upload(product_dictionary)
 
-    # Go back to the parent directory to be able to use other methods in the future
+    # Go back two directories prior to be able to use other methods in the future
 
-    parent_directory = os.path.dirname(os.getcwd())
-    os.chdir(parent_directory)
+    for _ in range(2):
+        parent_directory = os.path.dirname(os.getcwd())
+        os.chdir(parent_directory)
 
 
 
