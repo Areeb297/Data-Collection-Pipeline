@@ -3,6 +3,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
 import time
 from selenium.webdriver.support.ui import WebDriverWait  
 from selenium.webdriver.support import expected_conditions as EC
@@ -33,27 +34,15 @@ class Amazon_UK_Scraper():
     # Methods --> Accept Cookies, Scrolling down, Clicking on next page until run out of pages
     # Finding information about best sellers and most wished for products in a given section in the UK Amazon ecommerce site e.g., price etc
 
-
-    def __init__(self, options, items): 
-
+    @validate_arguments
+    def __init__(self, options, items, url: str): 
+        
         """
         See help(Amazon_UK_Scraper) for details
         """
-
+      
         self.options = options.lower() # To keep text consistent
         self.items = items.lower() # To keep text consistent
-
-    @validate_arguments
-    def set_driver_url(self, url: str):
-
-        """
-        This function installs and initializes the latest version of Chrome driver & directs the driver to the Amazon UK webpage url.
-
-
-        Args:
-            url (str): The URL of the webpage to perform webscraping on
-
-        """
         self.driver = webdriver.Chrome(ChromeDriverManager().install()) # Get the latest version of Chrome Driver Manager
         self.driver.get(url)
 
@@ -71,6 +60,30 @@ class Amazon_UK_Scraper():
             time.sleep(1)
 
         except:
+            pass
+        
+    def change_region(self):
+    
+        """
+        This method ensures the region is set to the UK when accessing this scraper in a different country as this scraper only works within the UK region
+        """
+
+        # We need to check whether region is set to the UK as that is important - This scraper only works for products delivered to regions in the UK
+        # First lets check whether scraper is used in the UK and if so avoid using the steps in this method
+        region = input("Are you in the UK: ")
+        if str(region).lower() == "no":
+            self.driver.find_element(by=By.XPATH, value='//div[@id="nav-global-location-slot"]').click() # Locate the region button and click
+
+            time.sleep(1)
+            s = self.driver.find_element(by=By.XPATH, value='//input[@class="GLUX_Full_Width a-declarative"]') # Find the input text element
+            s.click()
+            time.sleep(1)
+            s.send_keys('CV47AL')  # send an example UK postcode
+            time.sleep(1) 
+            s.send_keys(Keys.ENTER) # Press Enter with the example code 
+            time.sleep(1)
+            self.driver.find_element(by=By.XPATH, value='//input[@type="submit"]').submit() # Submit the code 
+        else:
             pass
 
     def scroll_bottom(self):
@@ -246,7 +259,7 @@ class Amazon_UK_Scraper():
 
         # Price of the product
         try:
-            price = self.driver.find_element(By.XPATH, '//div[@class="corePrice_feature_div"]').text
+            price = self.driver.find_element(By.XPATH, '//span[@class="a-size-base a-color-price"]').text
         except:
             price = 'N/A'  # Different products have prices shown on different locations (normally it could be three places, hence we use the try except statement)
 
