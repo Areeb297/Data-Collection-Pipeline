@@ -36,11 +36,11 @@ class Amazon_UK_Scraper():
 
     @validate_arguments
     def __init__(self, options, items, url: str): 
-        
+
         """
         See help(Amazon_UK_Scraper) for details
         """
-      
+
         self.options = options.lower() # To keep text consistent
         self.items = items.lower() # To keep text consistent
         self.driver = webdriver.Chrome(ChromeDriverManager().install()) # Get the latest version of Chrome Driver Manager
@@ -61,9 +61,9 @@ class Amazon_UK_Scraper():
 
         except:
             pass
-        
+
     def change_region(self):
-    
+
         """
         This method ensures the region is set to the UK when accessing this scraper in a different country as this scraper only works within the UK region
         """
