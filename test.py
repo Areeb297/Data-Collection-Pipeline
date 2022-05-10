@@ -1,9 +1,10 @@
 import unittest
-from AmazonWebScraper import AmazonUKScraper
 import pandas as pd
 from PIL import Image
 import os
 from selenium.webdriver.common.by import By
+
+from AmazonWebScraper import AmazonUKScraper
 
 
 class ScraperTest(unittest.TestCase):
@@ -31,7 +32,7 @@ class ScraperTest(unittest.TestCase):
         # Tries to find the XPATH of the cookies button element and if not found, return False - we expect to obtain False if our accpet cookies method ran 
         # successfully
         try:
-            self.scrap_1.find_element(by=By.XPATH, value='//span[@class="a-button a-button-primary"]') 
+            self.scrap_1.driver.find_element(by=By.XPATH, value='//span[@class="a-button a-button-primary"]') 
             val = True
         except:
             val = False
