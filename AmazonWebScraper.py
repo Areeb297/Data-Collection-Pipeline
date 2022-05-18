@@ -466,8 +466,8 @@ class AmazonUKScraper():
 
         os.chdir('raw_data')
 
-    
-    def upload_to_cloud(self):
+    @staticmethod
+    def upload_to_cloud():
 
         """
         This class method uses boto3 to create a S3 bucket on AWS and upload the raw_data folder which includes all the image files 
