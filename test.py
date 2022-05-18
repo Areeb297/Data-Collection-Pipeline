@@ -23,7 +23,7 @@ class ScraperTest(unittest.TestCase):
 
         """
 
-        expected_value = '101.0.4951.54' # Driver we worked with where one can change this if needed 
+        expected_value = '101.0.4951.67' # Driver we worked with where one can change this if needed 
         actual_value = self.scrap_1.__dict__['driver'].__dict__['caps']['browserVersion']
         # Assert statement to check expected and actual are the same values
         self.assertEqual(expected_value, actual_value)
