@@ -1,6 +1,6 @@
 # Data-Collection-Pipeline
 
-> This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up with the latest market trends. We only experiment with the Computer & Accessories category but just by changing the url in the scraper, we can get the data for any other desired category.
+> This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up with the latest market trends. We only experiment with the Computer & Accessories and the Most Wished for product category but just by changing the url in the scraper, we can get the data for any other desired category.
 
 ## Milestone 1
 
@@ -128,7 +128,14 @@ In this milestone, we added docstrings to our class methods using Google's recom
   self.assertGreater(df['Price'].astype(float).sum(), 5) # Test 2
 
 ```
+## Milestone 4
 
+In this milestone, 
+
+```python
+
+  
+```
 
 ## Conclusions
 
