@@ -16,6 +16,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 from pydantic import validate_arguments
 
+import boto3
+from sqlalchemy import create_engine
+
+
 
 
 
@@ -37,7 +41,7 @@ class AmazonUKScraper():
     # Finding information about best sellers and most wished for products in a given section in the UK Amazon ecommerce site e.g., price etc
 
     @validate_arguments
-    def __init__(self, options, items, url: str): 
+    def __init__(self, options: str, items, url: str): 
         
         """
         See help(Amazon_UK_Scraper) for details
@@ -315,20 +319,32 @@ class AmazonUKScraper():
 
         # Below, we know for certain that these elements exist, hence we will not use try-except here
 
-        # Review ratings
-        review_ratings = self.driver.find_element(By.XPATH, '//span[@class="a-size-medium a-color-base"]').text
-
-        # Number of ratings
-        global_ratings = self.driver.find_element(By.XPATH, '//div[@data-hook="total-review-count"]').text
-
-        # Review topics
+        
         try:
-            topics_review = self.driver.find_element(By.XPATH, '//div[@data-hook="lighthut-terms-list"]').text
-        except NoSuchElementException:
-            topics_review = 'N/A'
+            # Review ratings
+            review_ratings = self.driver.find_element(By.XPATH, '//span[@class="a-size-medium a-color-base"]').text
+        except:
+            review_ratings = 'No rating'
+        
+        try:  # Number of ratings
+            global_ratings = self.driver.find_element(By.XPATH, '//div[@data-hook="total-review-count"]').text
+        except:
+            global_ratings = 'No global rating'
 
-        # Most helpful review
-        review_helpful = self.driver.find_element(By.XPATH, '//div[@class="a-section review aok-relative"]').text
+        try:
+            # Review topics
+            topics_review = self.driver.find_element(By.XPATH, '//div[@data-hook="lighthut-terms-list"]').text
+        except:
+            topics_review = 'No review topics'
+
+        try:
+            # Most helpful review
+            first_review = self.driver.find_element(by=By.XPATH, value='//div[@id="cm-cr-dp-review-list"]').find_elements(by=By.XPATH, value='./div[@data-hook="review"]')[0]
+            review_helpful = first_review.find_element(by=By.XPATH, value='//span[@data-hook="review-body"]').text
+
+        except:
+            review_helpful = 'No most helpful review'
+
 
         # Main Image Link
         src = self.driver.find_element(By.XPATH, '//div[@class="imgTagWrapper"]').find_element(By.TAG_NAME, 'img').get_attribute('src')
@@ -336,23 +352,6 @@ class AmazonUKScraper():
 
         return title, price, brand, voucher, price_override, review_ratings, global_ratings, topics_review, review_helpful, src
 
-
-
-
-    @staticmethod
-    def create_change_dir():
-
-        """
-        This method creates a directory called "raw_data" and changes the current directory
-
-        """
-        # Try except statement as directory will be created once the code is run and cannot be created twice
-        try:
-            os.mkdir("raw_data")
-        except:
-            print("Directory already exists")
-
-        os.chdir('raw_data')
 
 
     def prod_dict(self, links, n):
@@ -427,7 +426,8 @@ class AmazonUKScraper():
         Args:
             dictionary (dict): Information about every product
 
-
+        Returns:
+            datafrane: All product information in a pandas dataframe to upload on the AWS RDS
         """
         # dump the generated dictionary into a json file
 
@@ -449,6 +449,74 @@ class AmazonUKScraper():
             except:
                 print("Image already exists")
 
+        return df
+
+    @staticmethod
+    def create_raw_data_dir():
+
+        """
+        This method creates a directory called "raw_data" and changes the current directory
+
+        """
+        # Try except statement as directory will be created once the code is run and cannot be created twice
+        try:
+            os.mkdir("raw_data")
+        except:
+            print("Directory already exists")
+
+        os.chdir('raw_data')
+
+    
+    def upload_to_cloud(self):
+
+        """
+        This class method uses boto3 to create a S3 bucket on AWS and upload the raw_data folder which includes all the image files 
+        and the product information json file. 
+
+        """
+
+
+        s3 = boto3.client('s3')
+        s3.create_bucket(Bucket='aicorebucketareeb')
+
+        s3.upload_file('raw_data/data.json', 'aicorebucketareeb', 'raw_data/data.json')
+
+
+        for i in os.listdir('raw_data/images'): # We list out all the image files and loop to upload the files to S3 one by one
+            s3.upload_file('raw_data/images/'+i, 'aicorebucketareeb', 'raw_data/images/'+i)
+
+    def upload_dataframe_rds(self, df):
+
+        """
+        This function requests the user to input credentials required to set up connection between AWS RDS database and PostgresSQL/PgAdmin
+        where it then takes the dataframe which was entered as an argument, converts it to SQL format and the saves it in the RDS.
+
+        Args:
+            df (DataFrame): Pandas Dataframe containing all product information which was scraped
+
+        """
+
+        PASSWORD = input("Please input password: ")
+        ENDPOINT = input("Please enter your AWS endpoint for RDS: ")  # Change it for your AWS endpoint
+
+        DATABASE_TYPE = 'postgresql'
+        DBAPI = 'psycopg2'
+        USER = 'postgres'
+        PORT = 5432
+        DATABASE = 'postgres'
+        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
+        engine.connect()
+        if self.options == 'most wished for':
+            try:
+                df.to_sql('most_wished_for', engine, if_exists='replace')
+            except:
+                print('Dataframe already exists')
+        else:
+            try:
+                df.to_sql('best_seller', engine, if_exists='replace')
+            except:
+                print('Dataframe already exists')
+
 
 
 
@@ -460,15 +528,21 @@ if __name__ == '__main__':
     scraper.change_region()
 
     prod_links = scraper.get_all_links()
-    product_dictionary = scraper.prod_dict(prod_links, 5) # Get information about 5 products
-    scraper.create_change_dir()
-    scraper.dump_json_image_upload(product_dictionary)
+    product_dictionary = scraper.prod_dict(prod_links, 6) # Get information about 5 products
+    scraper.create_raw_data_dir()
+    df = scraper.dump_json_image_upload(product_dictionary)
 
     # Go back two directories prior to be able to use other methods in the future
 
     for _ in range(2):
         parent_directory = os.path.dirname(os.getcwd())
         os.chdir(parent_directory)
+
+    scraper.upload_to_cloud()
+    scraper.upload_dataframe_rds(df)
+
+    scraper.driver.quit()
+
 
 
 
