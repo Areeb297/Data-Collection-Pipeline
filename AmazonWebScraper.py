@@ -419,7 +419,7 @@ class AmazonUKScraper():
         return prop_dict
 
     @validate_arguments 
-    def dump_json_image_upload(self, prod_dict: dict):
+    def dump_json_image_upload(self, prod_diction: dict):
 
         """
         This function creates a new json file, stores the product dictionary obtained from the prod_dict function in json format. 
@@ -427,15 +427,16 @@ class AmazonUKScraper():
         Lastly, using the urlib package, it retrieves the product image link from the product dictionary and stores each image as jpg. 
 
         Args:
-            dictionary (dict): Information about every product
+            prod_diction (dict): Information about every product
 
         Returns:
-            datafrane: All product information in a pandas dataframe to upload on the AWS RDS
+            df_prod: All product information in a pandas dataframe to upload on the AWS RDS
         """
         # dump the generated dictionary into a json file
 
         with open('data.json', 'w') as f:
-            df_prod = pd.DataFrame(prod_dict) # First convert our dictionary of product information to a dataframe and then to json
+            df_prod = pd.DataFrame(prod_diction)  # First convert our dictionary of product information to a dataframe 
+                                                  # and then to json
             json.dump(df_prod.to_json(), f)
 
 
@@ -445,7 +446,7 @@ class AmazonUKScraper():
             print("Directory already exists")
 
         os.chdir('images')
-        for i, img_link in enumerate(prod_dict['Image link']):
+        for i, img_link in enumerate(prod_diction['Image link']):
             # download the image
             try:
                 urllib.request.urlretrieve(img_link, f"{i}.jpg")
