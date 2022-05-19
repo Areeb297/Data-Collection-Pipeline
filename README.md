@@ -130,9 +130,34 @@ In this milestone, we added docstrings to our class methods using Google's recom
 ```
 ## Milestone 4
 
-In this milestone, 
+In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads
+all the image files alongside the product json file. We use the os library to list out all the image files and then loop through them top upload the images to 
+S3 one by one. Our next method, upload_dataframe_rds, asks the user to input the password and endpoint to connect to the AWS RDS database and then converts the dataframe obtained from a previous method to SQL and uploads to RDS which is connected to pgadmin. The name of the dataframe is based on the options attribute of the Amazon Scraper. Below are the code snippets of how the files are uploaded to RDS and S3:
+
 
 ```python
+# S3
+s3 = boto3.client('s3')
+
+s3.upload_file('raw_data/data.json', 'aicorebucketareeb', 'raw_data/data.json')
+
+
+for i in os.listdir('raw_data/images'): # We list out all the image files and loop to upload the files to S3 one by one
+    s3.upload_file('raw_data/images/'+i, 'aicorebucketareeb', 'raw_data/images/'+i)
+    
+ # RDS
+ 
+engine.connect()
+if self.options == 'most wished for':
+    try:
+        df.to_sql('most_wished_for', engine, if_exists='replace')
+    except:
+        print('Dataframe already exists')
+else:
+    try:
+        df.to_sql('best_seller', engine, if_exists='replace')
+    except:
+        print('Dataframe already exists')
 
   
 ```
