@@ -419,7 +419,7 @@ class AmazonUKScraper():
         return prop_dict
 
     @validate_arguments 
-    def dump_json_image_upload(self, dictionary: dict):
+    def dump_json_image_upload(self, prod_dict: dict):
 
         """
         This function creates a new json file, stores the product dictionary obtained from the prod_dict function in json format. 
@@ -435,8 +435,8 @@ class AmazonUKScraper():
         # dump the generated dictionary into a json file
 
         with open('data.json', 'w') as f:
-            dataframe = pd.DataFrame(dictionary) # First convert our dictionary of product information to a dataframe and then to json
-            json.dump(dataframe.to_json(), f)
+            df_prod = pd.DataFrame(prod_dict) # First convert our dictionary of product information to a dataframe and then to json
+            json.dump(df_prod.to_json(), f)
 
 
         try:
@@ -445,14 +445,14 @@ class AmazonUKScraper():
             print("Directory already exists")
 
         os.chdir('images')
-        for i, img_link in enumerate(dictionary['Image link']):
+        for i, img_link in enumerate(prod_dict['Image link']):
             # download the image
             try:
                 urllib.request.urlretrieve(img_link, f"{i}.jpg")
             except:
                 print("Image already exists")
 
-        return dataframe
+        return df_prod
 
     @staticmethod
     def create_raw_data_dir():
