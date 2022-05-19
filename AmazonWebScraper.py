@@ -4,9 +4,8 @@ import time
 import uuid
 import json
 import urllib
-import os
 from tqdm import tqdm
-
+import os
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
