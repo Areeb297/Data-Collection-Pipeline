@@ -5,6 +5,8 @@ import uuid
 import json
 import urllib
 import os
+from tqdm import tqdm
+
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -82,7 +84,7 @@ class AmazonUKScraper():
             time.sleep(1)
             self.driver.find_element(by=By.XPATH, value='//div[@id="nav-global-location-slot"]').click() # Locate the region button and click
 
-            time.sleep(1)
+            time.sleep(2)
             s = self.driver.find_element(by=By.XPATH, value='//input[@class="GLUX_Full_Width a-declarative"]') # Find the input text element
             s.click()
             time.sleep(1)
@@ -333,7 +335,7 @@ class AmazonUKScraper():
 
         try:
             # Review topics
-            topics_review = self.driver.find_element(By.XPATH, '//div[@data-hook="lighthut-terms-list"]').text
+            topics_review = self.driver.find_element(by=By.XPATH, value='//div[@class="cr-lighthouse-terms"]').text
         except:
             topics_review = 'No review topics'
 
@@ -388,7 +390,8 @@ class AmazonUKScraper():
         'Page Link': []
         }
 
-        for link in links[0:n]:
+        # We use tqdm to have a progress bar to ensure the scraper is working
+        for link in tqdm(links[0:n]):
 
             self.driver.get(link)
             time.sleep(1)
@@ -497,7 +500,7 @@ class AmazonUKScraper():
         """
 
         PASSWORD = input("Please input password: ")
-        ENDPOINT = input("Please enter your AWS endpoint for RDS: ")  # Change it for your AWS endpoint
+        ENDPOINT = input("Please enter your AWS endpoint for RDS: ")  # Your AWS endpoint
 
         DATABASE_TYPE = 'postgresql'
         DBAPI = 'psycopg2'
@@ -528,6 +531,7 @@ if __name__ == '__main__':
     scraper.change_region()
 
     prod_links = scraper.get_all_links()
+
     product_dictionary = scraper.prod_dict(prod_links, 6) # Get information about 5 products
     scraper.create_raw_data_dir()
     df = scraper.dump_json_image_upload(product_dictionary)
