@@ -435,8 +435,8 @@ class AmazonUKScraper():
         # dump the generated dictionary into a json file
 
         with open('data.json', 'w') as f:
-            df = pd.DataFrame(dictionary) # First convert our dictionary of product information to a dataframe and then to json
-            json.dump(df.to_json(), f)
+            dataframe = pd.DataFrame(dictionary) # First convert our dictionary of product information to a dataframe and then to json
+            json.dump(dataframe.to_json(), f)
 
 
         try:
@@ -452,7 +452,7 @@ class AmazonUKScraper():
             except:
                 print("Image already exists")
 
-        return df
+        return dataframe
 
     @staticmethod
     def create_raw_data_dir():
@@ -534,7 +534,7 @@ if __name__ == '__main__':
 
     product_dictionary = scraper.prod_dict(prod_links, 6) # Get information about 5 products
     scraper.create_raw_data_dir()
-    df = scraper.dump_json_image_upload(product_dictionary)
+    dataframe = scraper.dump_json_image_upload(product_dictionary)
 
     # Go back two directories prior to be able to use other methods in the future
 
@@ -543,7 +543,7 @@ if __name__ == '__main__':
         os.chdir(parent_directory)
 
     scraper.upload_to_cloud()
-    scraper.upload_dataframe_rds(df)
+    scraper.upload_dataframe_rds(dataframe)
 
     scraper.driver.quit()
 
