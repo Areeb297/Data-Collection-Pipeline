@@ -1,8 +1,8 @@
 import unittest
 import pandas as pd
-from PIL import Image
 import re
 import json
+from PIL import Image
 from selenium.webdriver.common.by import By
 import boto3
 from sqlalchemy import create_engine
