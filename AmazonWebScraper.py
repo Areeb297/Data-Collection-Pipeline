@@ -4,8 +4,10 @@ import time
 import uuid
 import json
 import urllib
-from tqdm import tqdm
 import os
+import pickle
+from tqdm import tqdm
+
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -16,6 +18,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 from pydantic import validate_arguments
+from typing import Union
 
 import boto3
 from sqlalchemy import create_engine
@@ -267,28 +270,31 @@ class AmazonUKScraper():
 
         # Price of the product
         try:
-            price = self.driver.find_element(By.XPATH, '//span[@class="a-size-base a-color-price"]').text
+            price = self.driver.find_element(By.XPATH, '//span[@class="a-price a-text-price header-price a-size-base a-text-normal"]').text
         except NoSuchElementException:
-            price = 'N/A'  # Different products have prices shown on different locations (normally it could be three places, hence we use the try except statement)
+            try:
+                price = self.driver.find_element(By.XPATH, '//span[@class="a-size-medium a-color-price priceBlockBuyingPriceString"]').text.replace('\n', '.')
+            except:
+                price = 'N/A'  # Different products have prices shown on different locations (normally it could be three places, hence we use the try except statement)
+
 
         if price == 'N/A':
+
             try:
                 price = self.driver.find_element(By.XPATH, '//span[@class="a-price aok-align-center reinventPricePriceToPayMargin priceToPay"]').text.replace('\n', '.')
             except NoSuchElementException:
-                price = 'N/A'
 
-        if price == 'N/A':
-            try:
-                price = self.driver.find_element(By.XPATH, '//td[@class="a-span12"]').text
-            except NoSuchElementException:
-                price = 'N/A'
+                try:
+                    price = self.driver.find_element(By.XPATH, '//td[@class="a-span12"]').text
+                except NoSuchElementException:
+                    price = self.driver.find_element(By.XPATH, '//span[@class="a-size-base a-color-price"]').text
 
         # Similar to price, we find the same problems with Brand, Voucher, Promotion and hence we perform multiple try except statements
 
         # Brand
         try:
             brand = self.driver.find_element(By.XPATH, '//tr[@class="a-spacing-small po-brand"]').text.split(' ')[1]
-        except NoSuchElementException:
+        except:
             brand = 'N/A'
         # Voucher available
         try:
@@ -354,14 +360,53 @@ class AmazonUKScraper():
         return title, price, brand, voucher, price_override, review_ratings, global_ratings, topics_review, review_helpful, src
 
 
+    def product_data(self, prod_dictionary=None):
 
-    def prod_dict(self, links, n):
+        """
+        This method initializes and returns an empty dictionary if no dictionary is already present and input into the function. If we have already 
+        scraped the data, this function  returns the scraped product dictionary and prevents us from rescraping.
+
+        Args:
+            prod_dictionary (dict): Product dictionary (either None or full of scraped products from Amazon UK)
+
+        Returns:
+            dict: Either returns an empty product dictionary or with all product information 
+
+        """
+
+        if prod_dictionary == None:
+                    product_dict = {
+
+                    'UUID': [],
+                    'Unique Product ID': [],
+
+                    'Title': [],
+                    'Price': [],
+                    'Brand': [],
+                    'Savings/Promotion': [],
+                    'Voucher': [],
+
+                    'Review Ratings': [],
+                    'Global Ratings': [],
+                    'Topics in Reviews': [],
+                    'Most Helpful Review': [],
+                    'Image link': [],
+                    'Page Link': []
+                    }
+        else:
+            product_dict = prod_dictionary
+        
+        return product_dict
+
+    @validate_arguments
+    def prod_dict(self, data: Union[dict, None], links, n: Union[int, str]):
 
         """
         This function initializes a dictionary and by using the previously defined methods, retrieves different product information from every webpage,
         and appends the information to relevant list corresponding to the appropriate dictionary key.
 
         Args:
+            data (dict): Product dictionary (either empty or full of scraped products from Amazon UK)
             links (list): List of links relating to all products 
             n (int): How many products to scrape and gather information of
 
@@ -370,35 +415,24 @@ class AmazonUKScraper():
 
         """
 
-        prop_dict = {
-
-        'UUID': [],
-        'Unique Product ID': [],
-
-        'Title': [],
-        'Price': [],
-        'Brand': [],
-        'Savings/Promotion': [],
-        'Voucher': [],
-
-        'Review Ratings': [],
-        'Global Ratings': [],
-        'Topics in Reviews': [],
-        'Most Helpful Review': [],
-        'Image link': [],
-        'Page Link': []
-        }
-
+        prop_dict = self.product_data(data)
+        if n == 'all':
+            n = len(links)
         # We use tqdm to have a progress bar to ensure the scraper is working
-        for link in tqdm(links[0:n]):
+        for link in tqdm(links[0:n]):  
+            if self.unique_id_gen(link) in prop_dict['Unique Product ID']:
+                print('Already scraped this product')
+                continue 
 
             self.driver.get(link)
             time.sleep(1)
             self.scroll_bottom()
             time.sleep(2)
+            
+
+            prop_dict['Unique Product ID'].append(self.unique_id_gen(link))
             prop_dict['Page Link'].append(link)
             prop_dict['UUID'].append(self.v4_uuid())
-            prop_dict['Unique Product ID'].append(self.unique_id_gen(link))
 
 
             title, price, brand, voucher, price_override, review_ratings, global_ratings, \
@@ -440,17 +474,17 @@ class AmazonUKScraper():
 
 
         try:
-            os.mkdir("images")
+            os.mkdir("images_"+self.options)
         except:
             print("Directory already exists")
 
-        os.chdir('images')
+        os.chdir('images_'+self.options)
         for i, img_link in enumerate(prod_diction['Image link']):
             # download the image
-            try:
+            if os.path.exists(f"{i}.jpg") == True:
+                pass
+            else:
                 urllib.request.urlretrieve(img_link, f"{i}.jpg")
-            except:
-                print("Image already exists")
 
         return df_prod
 
@@ -469,8 +503,7 @@ class AmazonUKScraper():
 
         os.chdir('raw_data')
 
-    @staticmethod
-    def upload_to_cloud():
+    def upload_to_cloud(self):
 
         """
         This class method uses boto3 to create a S3 bucket on AWS and upload the raw_data folder which includes all the image files 
@@ -485,17 +518,17 @@ class AmazonUKScraper():
         s3.upload_file('raw_data/data.json', 'aicorebucketareeb', 'raw_data/data.json')
 
 
-        for i in os.listdir('raw_data/images'): # We list out all the image files and loop to upload the files to S3 one by one
-            s3.upload_file('raw_data/images/'+i, 'aicorebucketareeb', 'raw_data/images/'+i)
+        for i in os.listdir('raw_data/images_'+self.options): # We list out all the image files and loop to upload the files to S3 one by one
+            s3.upload_file('raw_data/images_'+self.options+'/'+i, 'aicorebucketareeb', 'raw_data/images_'+self.options+'/'+i)
 
     def upload_dataframe_rds(self, df):
 
         """
         This function requests the user to input credentials required to set up connection between AWS RDS database and PostgresSQL/PgAdmin
-        where it then takes the dataframe which was entered as an argument, converts it to SQL format and the saves it in the RDS.
+        using psycopg2 where it then takes the dataframe which was entered as an argument, converts it to SQL format and then saves it in the RDS.
 
         Args:
-            df (DataFrame): Pandas Dataframe containing all product information which was scraped
+            df (DataFrame): Pandas dataframe containing all product information which was scraped
 
         """
 
@@ -510,41 +543,82 @@ class AmazonUKScraper():
         engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
         engine.connect()
         if self.options == 'most wished for':
-            try:
-                df.to_sql('most_wished_for', engine, if_exists='replace')
-            except:
-                print('Dataframe already exists')
+            df.to_sql('most_wished_for', engine, if_exists='replace')
         else:
-            try:
-                df.to_sql('best_seller', engine, if_exists='replace')
-            except:
-                print('Dataframe already exists')
+            df.to_sql('best_seller', engine, if_exists='replace')
+
+
+    def move_to_parent_dir(self, n):
+
+        """
+        This class method allows us to move above to the parent directory a specified number of times using the os library
+
+        Args:
+            n (int): The number of times we want to move above to the parent directory
+
+        """
+        for _ in range(n):
+            parent_directory = os.path.dirname(os.getcwd())
+            os.chdir(parent_directory)
+
+    def update_prod_file(self, product_dictionary):
+    
+        """
+        This class method creates a pickle file named after the options input of the class and dumps the product dictionary there using pickle
+
+        Args:
+            product_dictionary (dict): The dictionary obtained after scraping all products (either best seller or most wished for)
+
+        """
+        empty = input("Do you want to overwrite the previous product data file: ")
+        if empty.lower() == 'yes':
+            with open('product_data_'+self.options+'.pkl', 'wb') as dict_data:
+                pickle.dump(product_dictionary, dict_data)
+        else:
+            pass
+
+    def read_product_file(self):
+
+        """
+        This function asks the user if a product file already exists and reads that using the pandas read_pickle method
+
+        Returns:
+            data (dict or None): All product information in the form of a dictionary or returns None
+        """
+
+        file_exist = input("Does product file exist: ")
+        if file_exist.lower() == 'no':
+            return None
+        else:
+            data = pd.read_pickle('product_data_'+self.options+'.pkl')
+            return data
+
+
 
 
 
 
 if __name__ == '__main__':
 
-
-    scraper = AmazonUKScraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
+    options = input("Please input your desired product category from [most wished for, best seller]: ")
+    scraper = AmazonUKScraper(options, "computer & accessories", "https://www.amazon.co.uk/")
     scraper.accept_cookies()
     scraper.change_region()
 
     prod_links = scraper.get_all_links()
-
-    product_dictionary = scraper.prod_dict(prod_links, 6) # Get information about 5 products
+    # Either there is no file or there is a product data file with a dictionary containing product information scraped
+    prod_data = scraper.read_product_file()
+    # We can set the prod_data to None if we want to just scrape new products
+    product_dictionary = scraper.prod_dict(prod_data, prod_links, 'all') # Get information about all products (We can specify numbers like 2, 3, 10 etc)
+    scraper.update_prod_file(product_dictionary)
     scraper.create_raw_data_dir()
     dataframe = scraper.dump_json_image_upload(product_dictionary)
 
     # Go back two directories prior to be able to use other methods in the future
 
-    for _ in range(2):
-        parent_directory = os.path.dirname(os.getcwd())
-        os.chdir(parent_directory)
-
+    scraper.move_to_parent_dir(2)
     scraper.upload_to_cloud()
     scraper.upload_dataframe_rds(dataframe)
-
     scraper.driver.quit()
 
 
