@@ -1,6 +1,6 @@
 # Data-Collection-Pipeline
 
-> This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up with the latest market trends. We only experiment with the Computer & Accessories and the Most Wished for product category but just by changing the url in the scraper, we can get the data for any other desired category.
+> This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up to date with the latest market trends. We only experiment with the Computer & Accessories and the Most Wished for product category but just by changing the url in the scraper, we can get the data for any other desired category.
 
 ## Milestone 1
 
@@ -16,16 +16,7 @@ for property in container_elements:
         link_list.append(link)
 
 return link_list
-        
-# How to run the scraper class:
-        
-scraper = Amazon_UK_Scraper("Best Seller", "Computer & Accessories", "https://www.amazon.co.uk/") # The input could be "Most Wished For" or "Best Seller"
-scraper.accept_cookies()
-scraper.change_region() # Use this if you are not in the UK as the scraper only works delivery regions in the UK
-links = scraper.get_all_links() # The get all links method uses the get get_links_per_page function and the get_all links function mainly justs appends the links to a 
-# main list and clicks on the next button to obtain the same data on the next page.
-prop_dict = scraper.prod_dict(links, 3) # Obtain a dictionary with all the product details 
-# The rest of the code and explanation can be found in the main scraper file
+       
 ```
 
 
@@ -137,29 +128,90 @@ S3 one by one. Our next method, upload_dataframe_rds, asks the user to input the
 
 ```python
 # S3
-s3 = boto3.client('s3')
+key_id = input('Enter your AWS key id: ')
+secret_key = input('Enter your AWS secret key: ')
+bucket_name = input('Enter your bucket name: ')
+region = input('Enter your regions: ')
 
-s3.upload_file('raw_data/data.json', 'aicorebucketareeb', 'raw_data/data.json')
+s3 = boto3.client("s3", 
+                region_name=region, 
+                aws_access_key_id=key_id, 
+                aws_secret_access_key=secret_key)
 
+s3.upload_file('raw_data/data.json', bucket_name, 'raw_data/data.json')
 
-for i in os.listdir('raw_data/images'): # We list out all the image files and loop to upload the files to S3 one by one
-    s3.upload_file('raw_data/images/'+i, 'aicorebucketareeb', 'raw_data/images/'+i)
+for i in os.listdir('raw_data/images_'+self.options): # We list out all the image files and loop to upload the files to S3 one by one
+    s3.upload_file('raw_data/images_'+self.options+'/'+i, bucket_name, 'raw_data/images_'+self.options+'/'+i)
     
- # RDS
- 
-engine.connect()
-if self.options == 'most wished for':
-    try:
-        df.to_sql('most_wished_for', engine, if_exists='replace')
-    except:
-        print('Dataframe already exists')
-else:
-    try:
-        df.to_sql('best_seller', engine, if_exists='replace')
-    except:
-        print('Dataframe already exists')
+# RDS
+engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
+conn = engine.connect()
+empty = input("Do you want to overwrite the previous SQL data in RDS: ")
+if empty.lower() == 'yes':
+    if self.options == 'most wished for':
+        df.to_sql("most_wished_for", conn, if_exists='replace', chunksize=60) # We have defined engine globally previously
+    else:
+        df.to_sql("best_seller", conn, if_exists='replace', chunksize=60)
 
   
+```
+
+## Milestone 5
+
+With this milestone, we add additional code to prevent our scraper from rescraping the data e.g., check if the product id already exists in the scraped dictionary. Moreover, we containerize our application where we use create a docker image for our webscraper so to avoid "it works on my machine" problem where all the required packages are installed using a requirements.txt file and dockerfile is used to build the docker image on top of a Python 3.8 image where it installs chromedriver and copies all the local files in the webscraper directory to the docker image. We can then run the docker image in a container and push it to dockerhub. Afterward, we pull the image into our EC2 Ubuntu instance and we can run our scraper there using headless mode. To run the python file inside a docker container and EC2 instance, we need to add several arguments such as headless mode, no sandbox, set the window size to be able to capture all web elements etc. Shown below is a code snippet of how we add those options to be able to run the code using docker. Additionally, we show the code which prevents rescraping of products:
+
+
+```python
+
+chrome_options = ChromeOptions()
+chrome_options.add_argument('--no-sandbox') 
+chrome_options.add_argument('--disable-dev-shm-usage') 
+chrome_options.add_argument("--window-size=1920, 1080")
+chrome_options.add_argument("--remote-debugging-port=9222") 
+s = Service(ChromeDriverManager().install())
+
+self.options = options.lower() # To keep text consistent
+self.items = items.lower() # To keep text consistent
+
+if headless:
+    chrome_options.add_argument('--headless')
+    self.driver = webdriver.Chrome(service=s, options=options)
+else:
+    self.driver = webdriver.Chrome(service=s)
+
+self.driver.get(url)
+
+# To prevent rescraping:
+
+# We check whether record exists in the SQL database connected with AWS RDS
+if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents rescraping if the product id is already scraped and added to the dict
+    if self.options == 'most wished for':
+        s = prod_id_most_wished_for['Unique Product ID'].str.contains(self.unique_id_gen(link)).sum() # There should only be one unique link
+        if s == 1:
+            print('Already scraped this product')
+            continue
+        elif s == 0:
+            print('This record does not exist in the SQL data in AWS RDS & PgAdmin')
+            pass
+    else:
+        s = prod_id_best_seller['Unique Product ID'].str.contains(self.unique_id_gen(link)).sum()
+        if s == 1: # There should only be one unique link
+            print('Already scraped this product')
+            continue
+
+        elif s == 0:
+            print('This record does not exist in the SQL data in AWS RDS & PgAdmin')
+            pass
+
+```
+
+## Milestone 4
+
+In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads
+
+
+```python
+
 ```
 
 ## Conclusions
