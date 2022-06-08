@@ -121,9 +121,9 @@ In this milestone, we added docstrings to our class methods using Google's recom
 ```
 ## Milestone 4
 
-In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads
-all the image files alongside the product json file. We use the os library to list out all the image files and then loop through them top upload the images to 
-S3 one by one. Our next method, upload_dataframe_rds, asks the user to input the password and endpoint to connect to the AWS RDS database and then converts the dataframe obtained from a previous method to SQL and uploads to RDS which is connected to pgadmin. The name of the dataframe is based on the options attribute of the Amazon Scraper. Below are the code snippets of how the files are uploaded to RDS and S3:
+In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads all the image files alongside the product json file. We use the os library to list out all the image files and then loop through them top upload the images to S3 one by one. Our next method, upload_dataframe_rds, asks the user to input the password and endpoint to connect to the AWS RDS database and then converts the dataframe obtained from a previous method to SQL and uploads to RDS which is connected to pgadmin.The name of the dataframe is based on the options attribute of the Amazon Scraper.
+
+When connecting to RDS and S3, to keep the credentials private, we ask the user to input these as shown below. Below are the code snippets of how the files are uploaded to RDS and S3:
 
 
 ```python
@@ -158,7 +158,9 @@ if empty.lower() == 'yes':
 
 ## Milestone 5
 
-With this milestone, we add additional code to prevent our scraper from rescraping the data e.g., check if the product id already exists in the scraped dictionary. Moreover, we containerize our application where we use create a docker image for our webscraper so to avoid "it works on my machine" problem where all the required packages are installed using a requirements.txt file and dockerfile is used to build the docker image on top of a Python 3.8 image where it installs chromedriver and copies all the local files in the webscraper directory to the docker image. We can then run the docker image in a container and push it to dockerhub. Afterward, we pull the image into our EC2 Ubuntu instance and we can run our scraper there using headless mode. To run the python file inside a docker container and EC2 instance, we need to add several arguments such as headless mode, no sandbox, set the window size to be able to capture all web elements etc. Shown below is a code snippet of how we add those options to be able to run the code using docker. Additionally, we show the code which prevents rescraping of products:
+With this milestone, we add additional code to prevent our scraper from rescraping the data e.g., check if the product id already exists in the scraped dictionary. Moreover, we containerize our application where we use create a docker image for our webscraper so to avoid "it works on my machine" problem where all the required packages are installed using a requirements.txt file and dockerfile is used to build the docker image on top of a Python 3.8 image where it installs chromedriver and copies all the local files in the webscraper directory to the docker image. We can then run the docker image in a container and push it to dockerhub. 
+
+Afterward, we pull the image into our EC2 Ubuntu instance and we can run our scraper there using headless mode. To run the python file inside a docker container and EC2 instance, we need to add several arguments such as headless mode, no sandbox, set the window size to be able to capture all web elements etc. Shown below is a code snippet of how we add those options to be able to run the code using docker. Additionally, we show the code which prevents rescraping of products:
 
 
 ```python
