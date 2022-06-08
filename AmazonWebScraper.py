@@ -9,6 +9,7 @@ import pickle
 from tqdm import tqdm
 
 
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -16,6 +17,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver import ChromeOptions
+
 import pandas as pd
 from pydantic import validate_arguments
 from typing import Union
@@ -45,16 +49,30 @@ class AmazonUKScraper():
     # Finding information about best sellers and most wished for products in a given section in the UK Amazon ecommerce site e.g., price etc
 
     @validate_arguments
-    def __init__(self, options: str, items, url: str): 
+    def __init__(self, options: str, items, url: (str), headless=False): 
         
         """
         See help(Amazon_UK_Scraper) for details
         """
-      
+
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument('--no-sandbox') 
+        chrome_options.add_argument('--disable-dev-shm-usage') 
+        chrome_options.add_argument("--window-size=1920, 1080")
+        chrome_options.add_argument("--remote-debugging-port=9222") 
+        s = Service(ChromeDriverManager().install())
+
         self.options = options.lower() # To keep text consistent
         self.items = items.lower() # To keep text consistent
-        self.driver = webdriver.Chrome(ChromeDriverManager().install()) # Get the latest version of Chrome Driver Manager
+
+        if headless:
+            chrome_options.add_argument('--headless')
+            self.driver = webdriver.Chrome(service=s, options=options)
+        else:
+            self.driver = webdriver.Chrome(service=s)
+
         self.driver.get(url)
+
 
 
     def accept_cookies(self):
@@ -286,8 +304,11 @@ class AmazonUKScraper():
 
                 try:
                     price = self.driver.find_element(By.XPATH, '//td[@class="a-span12"]').text
-                except NoSuchElementException:
-                    price = self.driver.find_element(By.XPATH, '//span[@class="a-size-base a-color-price"]').text
+                except:
+                    try:
+                        price = self.driver.find_element(By.XPATH, '//span[@data-maple-math="cost"]').text
+                    except NoSuchElementException:
+                        price = 'N/A'
 
         # Similar to price, we find the same problems with Brand, Voucher, Promotion and hence we perform multiple try except statements
 
@@ -398,6 +419,23 @@ class AmazonUKScraper():
         
         return product_dict
 
+    def engine_func(self):
+        """
+        This class method allows us to set up connection between us and the AWS RDS database and PostgresSQL/PgAdmin
+        using psycopg2
+        """
+
+        PASSWORD = input("Please input PostgresSQL password: ")
+        ENDPOINT = input("Please enter your AWS endpoint for RDS: ")  # Your AWS endpoint
+
+        DATABASE_TYPE = 'postgresql'
+        DBAPI = 'psycopg2'
+        USER = input("Please enter your username for database: ") #'postgres'
+        PORT = 5432
+        DATABASE = 'postgres'
+        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
+        return engine
+
     @validate_arguments
     def prod_dict(self, data: Union[dict, None], links, n: Union[int, str]):
 
@@ -414,15 +452,41 @@ class AmazonUKScraper():
             dict: All product information in the form of a dictionary 
 
         """
-
         prop_dict = self.product_data(data)
         if n == 'all':
             n = len(links)
         # We use tqdm to have a progress bar to ensure the scraper is working
+        try:
+            engine = self.engine_func()
+            global conn
+            conn = engine.connect()
+            prod_id_most_wished_for = pd.DataFrame(conn.execute('''SELECT "Unique Product ID" FROM most_wished_for'''))
+            prod_id_best_seller = pd.DataFrame(conn.execute('''SELECT "Unique Product ID" FROM best_seller'''))
+        except:
+            print("Can't connect / No data present in pgadmin")
         for link in tqdm(links[0:n]):  
-            if self.unique_id_gen(link) in prop_dict['Unique Product ID']:
-                print('Already scraped this product')
-                continue 
+
+            # We check whether record exists in the SQL database connected with AWS RDS
+            if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents rescraping if the product id is already scraped and added to the dict
+                if self.options == 'most wished for':
+                    s = prod_id_most_wished_for['Unique Product ID'].str.contains(self.unique_id_gen(link)).sum() # There should only be one unique link
+                    if s == 1:
+                        print('Already scraped this product')
+                        continue
+                    elif s == 0:
+                        print('This record does not exist in the SQL data in AWS RDS & PgAdmin')
+                        pass
+                else:
+                    s = prod_id_best_seller['Unique Product ID'].str.contains(self.unique_id_gen(link)).sum()
+                    if s == 1: # There should only be one unique link
+                        print('Already scraped this product')
+                        continue
+
+                    elif s == 0:
+                        print('This record does not exist in the SQL data in AWS RDS & PgAdmin')
+                        pass
+
+            
 
             self.driver.get(link)
             time.sleep(1)
@@ -510,42 +574,45 @@ class AmazonUKScraper():
         and the product information json file. 
 
         """
+        empty = input("Do you want to overwrite the raw_data folder in the S3 bucket: ")
+        if empty.lower() == 'yes':
+
+            key_id = input('Enter your AWS key id: ')
+            secret_key = input('Enter your AWS secret key: ')
+            bucket_name = input('Enter your bucket name: ')
+            region = input('Enter your regions: ')
+
+            s3 = boto3.client("s3", 
+                            region_name=region, 
+                            aws_access_key_id=key_id, 
+                            aws_secret_access_key=secret_key)
+
+            s3.upload_file('raw_data/data.json', bucket_name, 'raw_data/data.json')
 
 
-        s3 = boto3.client('s3')
-        s3.create_bucket(Bucket='aicorebucketareeb')
+            for i in os.listdir('raw_data/images_'+self.options): # We list out all the image files and loop to upload the files to S3 one by one
+                s3.upload_file('raw_data/images_'+self.options+'/'+i, bucket_name, 'raw_data/images_'+self.options+'/'+i)
+        else:
+            pass
 
-        s3.upload_file('raw_data/data.json', 'aicorebucketareeb', 'raw_data/data.json')
-
-
-        for i in os.listdir('raw_data/images_'+self.options): # We list out all the image files and loop to upload the files to S3 one by one
-            s3.upload_file('raw_data/images_'+self.options+'/'+i, 'aicorebucketareeb', 'raw_data/images_'+self.options+'/'+i)
 
     def upload_dataframe_rds(self, df):
 
         """
-        This function requests the user to input credentials required to set up connection between AWS RDS database and PostgresSQL/PgAdmin
-        using psycopg2 where it then takes the dataframe which was entered as an argument, converts it to SQL format and then saves it in the RDS.
+        This function takes the dataframe which was entered as an argument, converts it to SQL format and then saves it in the RDS.
 
         Args:
             df (DataFrame): Pandas dataframe containing all product information which was scraped
 
         """
-
-        PASSWORD = input("Please input password: ")
-        ENDPOINT = input("Please enter your AWS endpoint for RDS: ")  # Your AWS endpoint
-
-        DATABASE_TYPE = 'postgresql'
-        DBAPI = 'psycopg2'
-        USER = 'postgres'
-        PORT = 5432
-        DATABASE = 'postgres'
-        engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
-        engine.connect()
-        if self.options == 'most wished for':
-            df.to_sql('most_wished_for', engine, if_exists='replace')
+        empty = input("Do you want to overwrite the previous SQL data in RDS: ")
+        if empty.lower() == 'yes':
+            if self.options == 'most wished for':
+                df.to_sql("most_wished_for", conn, if_exists='replace', chunksize=60) # We have defined engine globally previously
+            else:
+                df.to_sql("best_seller", conn, if_exists='replace', chunksize=60)
         else:
-            df.to_sql('best_seller', engine, if_exists='replace')
+            pass
 
 
     def move_to_parent_dir(self, n):
@@ -570,7 +637,7 @@ class AmazonUKScraper():
             product_dictionary (dict): The dictionary obtained after scraping all products (either best seller or most wished for)
 
         """
-        empty = input("Do you want to overwrite the previous product data file: ")
+        empty = input("Do you want to overwrite the previous product data pickle file: ")
         if empty.lower() == 'yes':
             with open('product_data_'+self.options+'.pkl', 'wb') as dict_data:
                 pickle.dump(product_dictionary, dict_data)
@@ -601,7 +668,7 @@ class AmazonUKScraper():
 if __name__ == '__main__':
 
     options = input("Please input your desired product category from [most wished for, best seller]: ")
-    scraper = AmazonUKScraper(options, "computer & accessories", "https://www.amazon.co.uk/")
+    scraper = AmazonUKScraper(options, "computer & accessories", "https://www.amazon.co.uk/", headless=True)
     scraper.accept_cookies()
     scraper.change_region()
 
