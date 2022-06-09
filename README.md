@@ -47,10 +47,8 @@ A code snippet of the function that retrieves details from a product webpage alo
         
     def retrieve_details_from_a_page(self):
        
-        
         # There are some elements such as price or voucher which sometimes differ in location depending on the 
         # product and hence, we use multiple try and except statements to locate these if they exist. 
-
         # Title of the product
         try:
             title = self.driver.find_element(By.XPATH, '//span[@id="productTitle"]').text
@@ -58,20 +56,21 @@ A code snippet of the function that retrieves details from a product webpage alo
             title = 'N/A'
         
         # Price of the product
-        try:
-            price = self.driver.find_element(by=By.XPATH, value='//span[@class="a-price aok-align-center"]').text.replace('\n', '.')
-        except:
-            price = 'N/A'  # Different products have prices shown on different locations (normally it could be three places, hence we use the try except statement)
-            
+
         if price == 'N/A':
-            
+
             try:
-                price = self.driver.find_element(by=By.XPATH, value='//span[@class="a-price-whole"]').text
-            except:
-                price = 'N/A'
-            
-        if price == 'N/A':
-            price = self.driver.find_element(By.XPATH, '//td[@class="a-span12"]').text
+                price = self.driver.find_element(By.XPATH, '//span[@class="a-price aok-align-center reinventPricePriceToPayMargin     priceToPay"]').text.replace('\n', '.')
+            except NoSuchElementException:
+
+                try:
+                    price = self.driver.find_element(By.XPATH, '//td[@class="a-span12"]').text  # Different products have prices shown on different locations
+                except:
+                    try:
+                        price = self.driver.find_element(By.XPATH, '//span[@data-maple-math="cost"]').text
+                    except NoSuchElementException:
+                        price = 'N/A'
+
 ```
 
 Below is a screenshot of the dataframe obtained after scraping 3 product webpages, particularly the best sellers in the Computer & Accessories section.
