@@ -186,6 +186,10 @@ self.driver.get(url)
 # To prevent rescraping:
 
 # We check whether record exists in the SQL database connected with AWS RDS
+
+prod_id_most_wished_for = pd.DataFrame(conn.execute('''SELECT "Unique Product ID" FROM most_wished_for'''))
+prod_id_best_seller = pd.DataFrame(conn.execute('''SELECT "Unique Product ID" FROM best_seller'''))
+
 if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents rescraping if the product id is already scraped and added to the dict
     if self.options == 'most wished for':
         s = prod_id_most_wished_for['Unique Product ID'].str.contains(self.unique_id_gen(link)).sum() # There should only be one unique link
@@ -207,7 +211,7 @@ if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents r
 
 ```
 
-## Milestone 4
+## Milestone 6
 
 In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads
 
