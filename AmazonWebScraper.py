@@ -667,12 +667,13 @@ class AmazonUKScraper():
 
 if __name__ == '__main__':
 
-    options = input("Please input your desired product category from [most wished for, best seller]: ")
+    options = input("Please input the desired product category from (most wished for, best seller): ")
     scraper = AmazonUKScraper(options, "computer & accessories", "https://www.amazon.co.uk/", headless=True)
     scraper.accept_cookies()
-    scraper.change_region()
+    scraper.change_region()  # Use this if you are not in the UK as the scraper only works delivery regions in the UK
 
-    prod_links = scraper.get_all_links()
+    prod_links = scraper.get_all_links()  # The get all links method get_all links function mainly justs appends the links to a 
+    # main list and clicks on the next button to obtain the same data on the next page.
     # Either there is no file or there is a product data file with a dictionary containing product information scraped
     prod_data = scraper.read_product_file()
     # We can set the prod_data to None if we want to just scrape new products
