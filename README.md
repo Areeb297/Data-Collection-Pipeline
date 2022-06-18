@@ -5,7 +5,8 @@ This amazon scraper pipeline is designed to collect both structured and unstruct
 ## Project Outline
 
 This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up to date with the latest market trends. We only experiment with the Computer & Accessories and the Most Wished for product category but just by changing the url in the scraper, we can get the data for any other desired category. This scraper has also been published as a PyPi package here: https://pypi.org/project/areeb-amazon-scraper/0.0.1/
-## Milestone 1
+
+## Scraper functionality 
 
 The Amazon scraper firstly visits the amazon webpage, locates and accepts the cookies button using its XPATH, and then based on the input of the user (best seller, most wished), visits the specific URL, scrolls down to the bottom of the page until all products of that particular page are shown, finds and appends the links of every product to a main list, clicks on the next button and repeats the same steps. Shown below is a code snippet of the steps the code goes through when getting the links on a page. Additionally, we show how the methods are used in order to acquire all the links.
   
@@ -23,7 +24,7 @@ return link_list
 ```
 
 
-## Milestone 2
+## Scraping products and images with resulting dataframe shown
 
 Within this milestone, we retrieve all the product data and save it in dictionary format. The dictionary includes a unique product id obtained from the url of the webpage for example, B08F2NDB39 from "pd_rd_i=B08F2NDB39&th=1" section of the url, a version 4 universally unique id, title, price, product brand, promotion, ratings, most helpful review, and image and webpage link of the product. All the information is obtained through searching the XPATH of the appropriate element and obtaining it through Selenium. Additionally, we create two folders (raw_data, images) using the OS Python library where the dictionary and the images are saved. We use the os.mkdir command to create a new directory. Regarding downloading and saving images, we used the urllib library where we can download the image after obtaining the src link from the webpage using Selenium. The code for downloading the images using urllib is shown below:
 
@@ -80,7 +81,7 @@ Below is a screenshot of the dataframe obtained after scraping 3 product webpage
 > ![image](https://user-images.githubusercontent.com/51030860/162643812-1ad33b30-42e6-4e81-97d5-327504758582.png)
 
 
-## Milestone 3
+## Docstrings & Testing
 
 In this milestone, we added docstrings to our class methods using Google's recommended form of documentation and created a testing file which performs integration and unit testing such as checking that there are no null values for price of a product which can be seen in the code snippet below:
 
@@ -127,7 +128,7 @@ def setUpClass(cls): # The setup class is used to initialize our scraper once so
   self.scrap_1.update_prod_file(prop_dict)
 
 ```
-## Milestone 4
+## Connecting and uploading to AWS S3 & PostgreSQL RDS
 
 In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads all the image files alongside the product json file. We use the os library to list out all the image files and then loop through them top upload the images to S3 one by one. Our next method, upload_dataframe_rds, asks the user to input the password and endpoint to connect to the AWS RDS database and then converts the dataframe obtained from a previous method to SQL and uploads to RDS which is connected to pgadmin.The name of the dataframe is based on the options attribute of the Amazon Scraper.
 
@@ -164,7 +165,7 @@ if empty.lower() == 'yes':
   
 ```
 
-## Milestone 5
+## Containerzing using Docker and running on AWS EC2 instance
 
 With this milestone, we add additional code to prevent our scraper from rescraping the data e.g., check if the product id already exists in the scraped dictionary. Moreover, we containerize our application where we use create a docker image for our webscraper so to avoid "it works on my machine" problem where all the required packages are installed using a requirements.txt file and dockerfile is used to build the docker image on top of a Python 3.8 image where it installs chromedriver and copies all the local files in the webscraper directory to the docker image. We can then run the docker image in a container and push it to dockerhub. This image is publicly accessible on DockerHub and can be pulled as follows: docker pull areeb297/amazon:latest
 
@@ -219,7 +220,7 @@ if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents r
 
 ```
 
-## Milestone 6
+## Monitoring using Prometheus & Grafana
 
 Our next step is monitoring the docker containers using Prometheus and Grafana where we first create a container running Prometheus on the EC2 instance after pulling the Prometheus image from Dockerhub. We change the security inbound rules to be able to be access port 9090 and see the Prometheus webpage. Afterward, prometheus was configured to scrape node exporter metrics for tracking OS metrics. Exporters like node are useful for exporting existing metrics from third party systems and making them available to Prometheus. Lastly, we install Grafana and we are able to then view OS and Docker metrics on localhost:3000 in a dashboard format as shown below which include visualizing metrics like container states, number of bytes in use etc:
 
@@ -229,7 +230,7 @@ Grafana
 ![image](https://user-images.githubusercontent.com/51030860/174436211-2179df05-24cf-40f5-95bb-49cd9c21d628.png)
 
 
-## Milestone 7
+## CI-CD Pipeline
 
 The last milestone involves setting up a CI-CD pipeline using Github Actions where we setup the GitHub secret credentials for us to be able to push the new changes to our files to our docker image on Dockerhub. The CI-CD pipeline entails us pushing changes from our local machine to the Github repository using git which results in Github automatically building a new docker image and pushing it to our dockerhub account, thus replacing our older image.
 
