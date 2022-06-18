@@ -211,12 +211,18 @@ if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents r
 
 ## Milestone 6
 
-Our next step is monitoring the docker containers using Prometheus and Grafana where we first create a container running Prometheus on the EC2 instance after pulling the Prometheus image from Dockerhub. We change the security inbound rules to be able to be access port 9090 and see the Prometheus webpage. Afterward, prometheus was configured to scrape node exporter metrics for tracking OS metrics. Exporters like node are useful for exporting existing metrics from third party systems and making them available to Prometheus. Lastly, we install Grafana and we are able to then view OS and Docker metrics on localhost:3000 in a dashboard format as shown below which include visualizing metrics like container states, number of bytes in use etc.
+Our next step is monitoring the docker containers using Prometheus and Grafana where we first create a container running Prometheus on the EC2 instance after pulling the Prometheus image from Dockerhub. We change the security inbound rules to be able to be access port 9090 and see the Prometheus webpage. Afterward, prometheus was configured to scrape node exporter metrics for tracking OS metrics. Exporters like node are useful for exporting existing metrics from third party systems and making them available to Prometheus. Lastly, we install Grafana and we are able to then view OS and Docker metrics on localhost:3000 in a dashboard format as shown below which include visualizing metrics like container states, number of bytes in use etc:
 
 
 Grafana
 
 ![image](https://user-images.githubusercontent.com/51030860/174436211-2179df05-24cf-40f5-95bb-49cd9c21d628.png)
+
+
+## Milestone 7
+
+The last milestone involves setting up a CI-CD pipeline using Github Actions where we setup the GitHub secret credentials for us to be able to push the new changes to our files to our docker image on Dockerhub. The CI-CD pipeline entails us pushing changes from our local machine to the Github repository using git which results in Github automatically building a new docker image and pushing it to our dockerhub account, thus replacing our older image.
+
 
 
 ## Conclusions
