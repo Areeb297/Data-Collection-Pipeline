@@ -380,6 +380,22 @@ class AmazonUKScraper():
 
         return title, price, brand, voucher, price_override, review_ratings, global_ratings, topics_review, review_helpful, src
 
+    def read_product_file(self):
+    
+        """
+        This function asks the user if a product file already exists and reads that using the pandas read_pickle method
+
+        Returns:
+            data (dict or None): All product information in the form of a dictionary or returns None
+        """
+
+        file_exist = input("Does product file exist: ")
+        if file_exist.lower() == 'no':
+            return None
+        else:
+            data = pd.read_pickle('product_data_'+self.options+'.pkl')
+            return data
+
 
     def product_data(self, prod_dictionary=None):
 
@@ -644,21 +660,6 @@ class AmazonUKScraper():
         else:
             pass
 
-    def read_product_file(self):
-
-        """
-        This function asks the user if a product file already exists and reads that using the pandas read_pickle method
-
-        Returns:
-            data (dict or None): All product information in the form of a dictionary or returns None
-        """
-
-        file_exist = input("Does product file exist: ")
-        if file_exist.lower() == 'no':
-            return None
-        else:
-            data = pd.read_pickle('product_data_'+self.options+'.pkl')
-            return data
 
 
 
@@ -677,7 +678,10 @@ if __name__ == '__main__':
     # Either there is no file or there is a product data file with a dictionary containing product information scraped
     prod_data = scraper.read_product_file()
     # We can set the prod_data to None if we want to just scrape new products
-    product_dictionary = scraper.prod_dict(prod_data, prod_links, 'all') # Get information about all products (We can specify numbers like 2, 3, 10 etc)
+    val = input("How many products do you want to scrape (integer, 'all'): ")
+    if val != 'all':
+        val = int(val)
+    product_dictionary = scraper.prod_dict(prod_data, prod_links, val) # Get information about all products (We can specify numbers like 2, 3, 10 etc)
     scraper.update_prod_file(product_dictionary)
     scraper.create_raw_data_dir()
     dataframe = scraper.dump_json_image_upload(product_dictionary)
