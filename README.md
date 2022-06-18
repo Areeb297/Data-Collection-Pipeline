@@ -222,7 +222,7 @@ if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents r
 
 ## Monitoring using Prometheus & Grafana
 
-Our next step is monitoring the docker containers using Prometheus and Grafana where we first create a container running Prometheus on the EC2 instance after pulling the Prometheus image from Dockerhub. We change the security inbound rules to be able to be access port 9090 and see the Prometheus webpage. Afterward, prometheus was configured to scrape node exporter metrics for tracking OS metrics. Exporters like node are useful for exporting existing metrics from third party systems and making them available to Prometheus. Lastly, we install Grafana and we are able to then view OS and Docker metrics on localhost:3000 in a dashboard format as shown below which include visualizing metrics like container states, number of bytes in use etc:
+Our next step is monitoring the docker containers using Prometheus and Grafana where we first create a container running Prometheus on the EC2 instance after pulling the Prometheus image from Dockerhub. We change the security inbound rules to be able to be access port 9090 and see the Prometheus webpage. In our EC2 instance, we add a prometheus.yml file and a daemon.json file for monitoring docker containers using Prometheus. Afterward, prometheus was configured to scrape node exporter metrics for tracking OS metrics. Exporters like node are useful for exporting existing metrics from third party systems and making them available to Prometheus. Lastly, we install Grafana and we are able to then view OS and Docker metrics on localhost:3000 in a dashboard format as shown below which include visualizing metrics like container states, number of bytes in use etc:
 
 
 Grafana
