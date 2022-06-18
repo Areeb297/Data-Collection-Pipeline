@@ -156,7 +156,7 @@ if empty.lower() == 'yes':
 
 ## Milestone 5
 
-With this milestone, we add additional code to prevent our scraper from rescraping the data e.g., check if the product id already exists in the scraped dictionary. Moreover, we containerize our application where we use create a docker image for our webscraper so to avoid "it works on my machine" problem where all the required packages are installed using a requirements.txt file and dockerfile is used to build the docker image on top of a Python 3.8 image where it installs chromedriver and copies all the local files in the webscraper directory to the docker image. We can then run the docker image in a container and push it to dockerhub. 
+With this milestone, we add additional code to prevent our scraper from rescraping the data e.g., check if the product id already exists in the scraped dictionary. Moreover, we containerize our application where we use create a docker image for our webscraper so to avoid "it works on my machine" problem where all the required packages are installed using a requirements.txt file and dockerfile is used to build the docker image on top of a Python 3.8 image where it installs chromedriver and copies all the local files in the webscraper directory to the docker image. We can then run the docker image in a container and push it to dockerhub. This image is publicly accessible on DockerHub and can be pulled as follows: docker pull areeb297/amazon:latest
 
 Afterward, we pull the image into our EC2 Ubuntu instance and we can run our scraper there using headless mode. To run the python file inside a docker container and EC2 instance, we need to add several arguments such as headless mode, no sandbox, set the window size to be able to capture all web elements etc. Shown below is a code snippet of how we add those options to be able to run the code using docker. Additionally, we show the code which prevents rescraping of products:
 
@@ -211,12 +211,8 @@ if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents r
 
 ## Milestone 6
 
-In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads
+Our next step is monitoring the docker containers using Prometheus and Grafana where we first create a container running Prometheus on the EC2 instance after pulling the Prometheus image from Dockerhub. We change the security inbound rules to be able to be access port 9090 and see the Prometheus webpage. Afterward, prometheus was configured to scrape node exporter metrics for tracking OS metrics. Exporters like node are useful for exporting existing metrics from third party systems and making them available to Prometheus. Lastly, we install Grafana and we are able to then view OS and Docker metrics on localhost:3000 in a dashboard format as shown below which include visualizing metrics like container states, number of bytes in use etc.
 
-
-```python
-
-```
 
 Grafana
 
