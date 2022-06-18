@@ -392,9 +392,9 @@ class AmazonUKScraper():
         file_exist = input("Does product file exist: ")
         if file_exist.lower() == 'no':
             return None
-        else:
-            data = pd.read_pickle('product_data_'+self.options+'.pkl')
-            return data
+            
+        data = pd.read_pickle('product_data_'+self.options+'.pkl')
+        return data
 
 
     def product_data(self, prod_dictionary=None):
