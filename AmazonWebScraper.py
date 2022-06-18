@@ -667,8 +667,8 @@ class AmazonUKScraper():
 
 if __name__ == '__main__':
 
-    options = input("Please input the desired product category from [most wished for, best seller]: ")
-    scraper = AmazonUKScraper(options, "computer & accessories", "https://www.amazon.co.uk/", headless=True)
+    choices = input("Please input the desired product category from [most wished for, best seller]: ")
+    scraper = AmazonUKScraper(choices, "computer & accessories", "https://www.amazon.co.uk/", headless=False)
     scraper.accept_cookies()
     scraper.change_region()  # Use this if you are not in the UK as the scraper only works delivery regions in the UK
 
@@ -680,10 +680,10 @@ if __name__ == '__main__':
     val = input("How many products do you want to scrape (integer, 'all'): ")
     if val != 'all':
         val = int(val)
-    product_dictionary = scraper.prod_dict(prod_data, prod_links, val) # Get information about all products (We can specify numbers like 2, 3, 10 etc)
-    scraper.update_prod_file(product_dictionary)
+    product_diction = scraper.prod_dict(prod_data, prod_links, val) # Get information about all products (We can specify numbers like 2, 3, 10 etc)
+    scraper.update_prod_file(product_diction)
     scraper.create_raw_data_dir()
-    dataframe = scraper.dump_json_image_upload(product_dictionary)
+    dataframe = scraper.dump_json_image_upload(product_diction)
 
     # Go back two directories prior to be able to use other methods in the future
 
