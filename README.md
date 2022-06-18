@@ -218,6 +218,11 @@ In this milestone, we add two additional methods to our scraper class where the 
 
 ```
 
+Grafana
+
+![image](https://user-images.githubusercontent.com/51030860/174436211-2179df05-24cf-40f5-95bb-49cd9c21d628.png)
+
+
 ## Conclusions
 
 - Maybe write a conclusion to the project, what you understood about it and also how you would improve it or take it further.
