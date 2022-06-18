@@ -232,6 +232,8 @@ Grafana
 
 ## CI-CD Pipeline
 
-The last milestone involves setting up a CI-CD pipeline using Github Actions where we setup the GitHub secret credentials for us to be able to push the new changes to our files to our docker image on Dockerhub. The CI-CD pipeline entails us pushing changes from our local machine to the Github repository using git which results in Github automatically building a new docker image and pushing it to our dockerhub account, thus replacing our older image.
+The last milestone involves setting up a CI-CD pipeline using Github Actions where we setup the GitHub secret credentials for us to be able to push the new changes to our files to our docker image on Dockerhub. The CI-CD pipeline entails us pushing changes from our local machine to the Github repository using git which results in Github automatically building a new docker image and pushing it to our dockerhub account, thus replacing our older image. Shown in the image below are the steps taken by the Github workflow everytime we add a new commit to our repository:
+
+![image](https://user-images.githubusercontent.com/51030860/174460078-cf96e7bb-741d-4783-9aa7-8f3e83953019.png)
 
 
