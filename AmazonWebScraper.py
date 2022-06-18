@@ -680,7 +680,8 @@ if __name__ == '__main__':
     val = input("How many products do you want to scrape (integer, 'all'): ")
     if val != 'all':
         val = int(val)
-    product_diction = scraper.prod_dict(prod_data, prod_links, val) # Get information about all products (We can specify numbers like 2, 3, 10 etc)
+    product_diction = scraper.prod_dict(prod_data, prod_links, val)   # Get information about all products 
+    # (We can specify numbers like 2, 3, 10 etc)
     scraper.update_prod_file(product_diction)
     scraper.create_raw_data_dir()
     dataframe = scraper.dump_json_image_upload(product_diction)
