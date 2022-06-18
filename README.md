@@ -78,7 +78,7 @@ Below is a screenshot of the dataframe obtained after scraping 3 product webpage
 
 ## Milestone 3
 
-In this milestone, we added docstrings to our class methods using Google's recommended form of documentation and created a testing file which performs integration and unit testing such as checking we are using a specific chromedriver version or that there are no null values for price of a product which can be seen in the code snippet below:
+In this milestone, we added docstrings to our class methods using Google's recommended form of documentation and created a testing file which performs integration and unit testing such as checking that there are no null values for price of a product which can be seen in the code snippet below:
 
 ```python
 
@@ -104,12 +104,14 @@ In this milestone, we added docstrings to our class methods using Google's recom
 # Code snippets from our testing file
 
 @classmethod
-def setUpClass(cls):
+def setUpClass(cls): # The setup class is used to initialize our scraper once so we can perform different tests on that instance
     cls.options = input("Please input your desired product category from [most wished for, best seller]: ")
     cls.scrap_1 = AmazonUKScraper(cls.options, "computer & accessories", "https://www.amazon.co.uk/")
   
+  # We will test whether there are any null values for price that our scraper retrieves
   # Convert the dict into a dataframe and check the price column has no NaNs by converting to type float (if NaN value would be string N/A and
   # hence will result in error)
+  
   prod_data = self.scrap_1.read_product_file()
   prop_dict = self.scrap_1.prod_dict(prod_data, links, 10)
 
