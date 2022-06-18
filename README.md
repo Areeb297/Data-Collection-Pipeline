@@ -101,20 +101,24 @@ In this milestone, we added docstrings to our class methods using Google's recom
   
   
   
-  # Code snippets from our testing file
+# Code snippets from our testing file
 
-  self.scrap_1 = Amazon_UK_Scraper("most wished for", "computer & accessories", "https://www.amazon.co.uk/")
-  
-  expected_value = '101.0.4951.41' # Driver we worked with
-  actual_value = self.scrap_1.__dict__['driver'].__dict__['caps']['browserVersion']
-  # Assert statement to check expected and actual are the same values
-  self.assertEqual(expected_value, actual_value)
+@classmethod
+def setUpClass(cls):
+    cls.options = input("Please input your desired product category from [most wished for, best seller]: ")
+    cls.scrap_1 = AmazonUKScraper(cls.options, "computer & accessories", "https://www.amazon.co.uk/")
   
   # Convert the dict into a dataframe and check the price column has no NaNs by converting to type float (if NaN value would be string N/A and
-  #  hence will result in error)
-  prop_dict = self.scrap_1.prod_dict(links, 5)
-  df = pd.DataFrame(prop_dict)
-  self.assertGreater(df['Price'].astype(float).sum(), 5) # Test 2
+  # hence will result in error)
+  prod_data = self.scrap_1.read_product_file()
+  prop_dict = self.scrap_1.prod_dict(prod_data, links, 10)
+
+  dataframe = pd.DataFrame(prop_dict)
+  for i, j  in enumerate(dataframe['Price']):
+      dataframe['Price'][i] = re.sub("[^0-9.]", "", j) # Delete all non-numeric characters apart from '.'
+
+  self.assertGreater(dataframe['Price'].str.replace('£', '').astype(float).sum(), 30) # The sum of price column should be at least greater than £30
+  self.scrap_1.update_prod_file(prop_dict)
 
 ```
 ## Milestone 4
