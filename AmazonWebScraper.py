@@ -677,11 +677,10 @@ if __name__ == '__main__':
     # Either there is no file or there is a product data file with a dictionary containing product information scraped
     prod_data = scraper.read_product_file()
     # We can set the prod_data to None if we want to just scrape new products
-    val = input("How many products do you want to scrape (integer, 'all'): ")
-    if val != 'all':
-        val = int(val)
-    product_diction = scraper.prod_dict(prod_data, prod_links, val)   # Get information about all products 
-    # (We can specify numbers like 2, 3, 10 etc)
+    value = input("How many products do you want to scrape (integer, 'all'): ")
+    if value != 'all':
+        value = int(value)
+    product_diction = scraper.prod_dict(prod_data, prod_links, value)   # Get information about all products (We can specify numbers like 2, 3, 10 etc)
     scraper.update_prod_file(product_diction)
     scraper.create_raw_data_dir()
     dataframe = scraper.dump_json_image_upload(product_diction)
