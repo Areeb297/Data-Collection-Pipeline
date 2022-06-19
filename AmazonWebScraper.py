@@ -471,7 +471,6 @@ class AmazonUKScraper():
         if n == 'all':
             n = len(links)
         # We use tqdm to have a progress bar to ensure the scraper is working
-        
         try:
             engine = self.engine_func()
             global conn
@@ -659,11 +658,6 @@ class AmazonUKScraper():
                 pickle.dump(product_dictionary, dict_data)
         else:
             pass
-
-
-
-
-
 
 if __name__ == '__main__':
 
