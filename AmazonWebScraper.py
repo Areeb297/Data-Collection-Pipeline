@@ -250,7 +250,7 @@ class AmazonUKScraper():
 
 
     @staticmethod
-    def v4_uuid():
+    def _v4_uuid():
 
         """
         This function generates a unique uuid for every link using the uuid package
@@ -471,6 +471,7 @@ class AmazonUKScraper():
         if n == 'all':
             n = len(links)
         # We use tqdm to have a progress bar to ensure the scraper is working
+        
         try:
             engine = self.engine_func()
             global conn
@@ -511,7 +512,7 @@ class AmazonUKScraper():
 
             prop_dict['Unique Product ID'].append(self.unique_id_gen(link))
             prop_dict['Page Link'].append(link)
-            prop_dict['UUID'].append(self.v4_uuid())
+            prop_dict['UUID'].append(self._v4_uuid())
 
 
             title, price, brand, voucher, price_override, review_ratings, global_ratings, \
@@ -664,7 +665,6 @@ class AmazonUKScraper():
 
 
 
-
 if __name__ == '__main__':
 
     choices = input("Please input the desired product category from [most wished for, best seller]: ")
@@ -691,14 +691,3 @@ if __name__ == '__main__':
     scraper.upload_to_cloud()
     scraper.upload_dataframe_rds(dataframe)
     scraper.driver.quit()
-
-
-
-
-
-
-
-
-
-
-
