@@ -244,5 +244,5 @@ Finally, a daily cronjob was set up to operate every 12-am-midnight to scrape an
 
 ![image](https://user-images.githubusercontent.com/51030860/177171542-01fa31a2-c165-46bd-b67a-874451a15aae.png)
 
-![image](https://user-images.githubusercontent.com/51030860/177171563-754dfbd0-dd1c-4492-bf95-52eda8433268.png)
+![image](https://user-images.githubusercontent.com/51030860/177171640-e23fac3e-348f-47c3-b928-0a1cea8f25ab.png)
 
