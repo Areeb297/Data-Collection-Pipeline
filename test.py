@@ -3,8 +3,7 @@ import pandas as pd
 import time
 from PIL import Image
 from selenium.webdriver.common.by import By
-from main import Run_Scraper
-
+from Project.main import Run_Scraper
 
 class ScraperTest(unittest.TestCase):
     """

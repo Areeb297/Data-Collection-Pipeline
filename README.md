@@ -95,6 +95,9 @@ In this milestone, we added docstrings to our class methods using Google's recom
   
 # Code snippets from our testing file
 
+# For testing, we update the env file to start_empty='yes' so we can test if required number of products are scraped etc:
+empty_existing_data = os.getenv('start_empty')
+# Or when running the docker image, we can change start_empty to yes by running docker run -e start_empty=yes -it amazon_scraper
 class ScraperTest(unittest.TestCase):
     """
     This test class ensures all public methods of the AmazonUKScraper Class work as expected

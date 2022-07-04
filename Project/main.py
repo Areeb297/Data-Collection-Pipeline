@@ -11,7 +11,7 @@ from typing import Union
 import boto3
 from sqlalchemy import create_engine 
 
-from scraper_module_1 import AmazonUKScraper
+from Project.scraper_module_1 import AmazonUKScraper
 
 from dotenv import load_dotenv
 load_dotenv()
