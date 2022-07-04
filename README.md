@@ -222,7 +222,7 @@ if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents r
 
 ## Monitoring using Prometheus & Grafana
 
-Our next step is monitoring the docker containers using Prometheus and Grafana where we first create a container running Prometheus on the EC2 instance after pulling the Prometheus image from Dockerhub. We change the security inbound rules to be able to be access port 9090 and see the Prometheus webpage. In our EC2 instance, we add a prometheus.yml file and a daemon.json file for monitoring docker containers using Prometheus. Afterward, prometheus was configured to scrape node exporter metrics for tracking OS metrics. Exporters like node are useful for exporting existing metrics from third party systems and making them available to Prometheus. Lastly, we install Grafana and we are able to then view OS and Docker metrics on localhost:3000 in a dashboard format as shown below which include visualizing metrics like container states, number of bytes in use etc:
+Our next step is monitoring the docker containers using Prometheus and Grafana where we first create a container running Prometheus on the EC2 instance after pulling the Prometheus image from Dockerhub. We change the security inbound rules to be able to access port 9090 and see the Prometheus webpage. In our EC2 instance, we add a prometheus.yml file and a daemon.json file for monitoring docker containers using Prometheus. Afterward, prometheus was configured to scrape node exporter metrics for tracking OS metrics. Exporters like node are useful for exporting existing metrics from third party systems and making them available to Prometheus. Lastly, we install Grafana and we are able to then view OS and Docker metrics on localhost:3000 in a dashboard format as shown below which include visualizing metrics like container states, number of bytes in use etc:
 
 
 Grafana
@@ -236,4 +236,13 @@ The last milestone involves setting up a CI-CD pipeline using Github Actions whe
 
 ![image](https://user-images.githubusercontent.com/51030860/174460078-cf96e7bb-741d-4783-9aa7-8f3e83953019.png)
 
+Finally, a daily cronjob was set up to operate every 12-am-midnight to scrape and update the most-wished-for product database in AWS S3 and RDS. As we used an env file, we can easily change the product category by adding -e options='best seller' in the sudo docker statement. The images of the cronjob file and the result run on our ubuntu EC2 instance is shown below. The cronjob does the following:
+
+* Restart the scraper every midnight on the EC2 instance by using 0 0 * * * in the cron file.
+* Stops and kills the docker container after a successful run from the previous cronjob.
+* Pulls the latest amazon scraper image from DockerHub & runs the scraper again the next midnight
+
+![image](https://user-images.githubusercontent.com/51030860/177171542-01fa31a2-c165-46bd-b67a-874451a15aae.png)
+
+![image](https://user-images.githubusercontent.com/51030860/177171563-754dfbd0-dd1c-4492-bf95-52eda8433268.png)
 
