@@ -42,10 +42,7 @@ A code snippet of the function that retrieves details from a product webpage alo
     
     
     def v4_uuid(self):
-        
-        
-        uuid_4 = uuid.uuid4()
-            
+        uuid_4 = uuid.uuid4()  
         return str(uuid_4)  
 
         
@@ -54,11 +51,9 @@ A code snippet of the function that retrieves details from a product webpage alo
         # Price of the product
 
         if price == 'N/A':
-
             try:
                 price = self.driver.find_element(By.XPATH, '//span[@class="a-price aok-align-center reinventPricePriceToPayMargin     priceToPay"]').text.replace('\n', '.')
             except NoSuchElementException:
-
                 try:
                     price = self.driver.find_element(By.XPATH, '//td[@class="a-span12"]').text  # Different products have prices shown on different locations
                 except:
@@ -105,12 +100,7 @@ class ScraperTest(unittest.TestCase):
     This test class ensures all public methods of the AmazonUKScraper Class work as expected
     """
     @classmethod
-    def setUpClass(cls):
-
-        """Set up method initialises an instance of Run_Scraper class 
-        and navigates to desired product category page after accepting cookies
-        and changing to the correct region for delivert if necessary (not in the UK)
-        """
+    def setUpClass(cls): 
         cls.options = input("Please input your desired product category from [most wished for, best seller]: ")
         cls.headless = input("True or False for Headless: ")
         cls.scrap_1 = Run_Scraper(cls.options, "computer & accessories", cls.headless)
@@ -126,9 +116,6 @@ class ScraperTest(unittest.TestCase):
         # check region is Coventry after applying the change region method
         self.scrap_1.driver.find_element(by=By.XPATH, value='//span[@class="nav-line-2 nav-progressive-content"]').text[:8] == 'Coventry'
         prod_diction = self.scrap_1.collectdata(num_links)
-        # check for duplicates
-        dataframe = pd.DataFrame(prod_diction)
-        self.assertEqual(dataframe.duplicated().sum(), 0)
         # check correct number of products scraped
         self.assertEqual(len(prod_diction['Price']), num_links)
 
