@@ -95,9 +95,6 @@ In this milestone, we added docstrings to our class methods using Google's recom
   
 # Code snippets from our testing file
 
-# For testing, we update the env file to start_empty='yes' so we can test if required number of products are scraped etc:
-empty_existing_data = os.getenv('start_empty')
-# Or when running the docker image, we can change start_empty to yes by running docker run -e start_empty=yes -it amazon_scraper
 class ScraperTest(unittest.TestCase):
     """
     This test class ensures all public methods of the AmazonUKScraper Class work as expected
@@ -123,6 +120,13 @@ class ScraperTest(unittest.TestCase):
         self.assertEqual(len(prod_diction['Price']), num_links)
 
 ```
+For testing, we update the env file to start_empty='yes' so we can test if required number of products are scraped etc:
+```python
+empty_existing_data = os.getenv('start_empty')
+```
+Or when running the docker image, we can change start_empty to yes by running:
+docker run -e start_empty=yes -it amazon_scraper
+
 ## Connecting and uploading to AWS S3 & PostgreSQL RDS
 
 In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads all the image files alongside the product json file. We use the os library to list out all the image files and then loop through them top upload the images to S3 one by one. Our next method, upload_dataframe_rds, gets input such as the bucket name or aws endpoint from the .env file and connects to the AWS RDS database and then converts the dataframe obtained from the previous class method to SQL and uploads and appends any additional product data to the dataframe uploaded in RDS previously via pgadmin.The name of the dataframe is based on the options attribute of the Amazon Scraper.
