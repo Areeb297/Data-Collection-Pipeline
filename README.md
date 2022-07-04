@@ -4,7 +4,7 @@ This amazon scraper pipeline is designed to collect both structured and unstruct
 
 ## Project Outline
 
-This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up to date with the latest market trends. We only experiment with the Computer & Accessories and the Most Wished for product category but just by changing the url in the scraper, we can get the data for any other desired category. This scraper has also been published as a PyPi package here: https://pypi.org/project/areeb-amazon-scraper/0.0.1/
+This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up to date with the latest market trends. We only experiment with the Computer & Accessories and the Most Wished for product category but just by changing the url in the scraper, we can get the data for any other desired category. This scraper has also been published as a PyPi package here: https://pypi.org/project/areeb-amazon-scraper/0.0.2/
 
 ## Scraper functionality 
 
