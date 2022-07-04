@@ -4,7 +4,7 @@ This amazon scraper pipeline is designed to collect both structured and unstruct
 
 ## Project Outline
 
-This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category at any time. With the obtained data, one can analyze and keep up to date with the latest market trends. We only experiment with the Computer & Accessories and the Most Wished for product category but just by changing the url in the scraper, we can get the data for any other desired category. This scraper has also been published as a PyPi package here: https://pypi.org/project/areeb-amazon-scraper/0.0.2/
+This project involves performing webscraping with Selenium to extract all the best seller and most wished for products on the Amazon UK webpage. This will easily allow the user to gather all the useful data relating to best selling products or the most desired items in a specified product category such as Computer & Accessories. With the obtained data, one can analyze and keep up to date with the latest market trends. Everytime we run the scraper, we append products to our database that were not present before. With this data, we can also deduce how the trends change and what products are expected to be in best seller or most wished for often. We only experiment with the Computer & Accessories and the Most Wished for product category but just by changing the url in the scraper, we can get the data for any other desired category. This scraper has also been published as a PyPi package here: https://pypi.org/project/areeb-amazon-scraper/0.0.2/. We have two python modules, one possessing all the scraping methods and the main python file having all the cloud and uploading of data methods where this main file uses methods from the scraper_module_1.py file to fully run the whole scraper.
 
 ## Scraper functionality 
 
@@ -51,14 +51,6 @@ A code snippet of the function that retrieves details from a product webpage alo
         
     def retrieve_details_from_a_page(self):
        
-        # There are some elements such as price or voucher which sometimes differ in location depending on the 
-        # product and hence, we use multiple try and except statements to locate these if they exist. 
-        # Title of the product
-        try:
-            title = self.driver.find_element(By.XPATH, '//span[@id="productTitle"]').text
-        except NoSuchElementException:
-            title = 'N/A'
-        
         # Price of the product
 
         if price == 'N/A':
@@ -108,59 +100,82 @@ In this milestone, we added docstrings to our class methods using Google's recom
   
 # Code snippets from our testing file
 
-@classmethod
-def setUpClass(cls): # The setup class is used to initialize our scraper once so we can perform different tests on that instance
-    cls.options = input("Please input your desired product category from [most wished for, best seller]: ")
-    cls.scrap_1 = AmazonUKScraper(cls.options, "computer & accessories", "https://www.amazon.co.uk/")
-  
-  # We will test whether there are any null values for price that our scraper retrieves
-  # Convert the dict into a dataframe and check the price column has no NaNs by converting to type float (if NaN value would be string N/A and
-  # hence will result in error)
-  
-  prod_data = self.scrap_1.read_product_file()
-  prop_dict = self.scrap_1.prod_dict(prod_data, links, 10)
+class ScraperTest(unittest.TestCase):
+    """
+    This test class ensures all public methods of the AmazonUKScraper Class work as expected
+    """
+    @classmethod
+    def setUpClass(cls):
 
-  dataframe = pd.DataFrame(prop_dict)
-  for i, j  in enumerate(dataframe['Price']):
-      dataframe['Price'][i] = re.sub("[^0-9.]", "", j) # Delete all non-numeric characters apart from '.'
-
-  self.assertGreater(dataframe['Price'].str.replace('£', '').astype(float).sum(), 30) # The sum of price column should be at least greater than £30
-  self.scrap_1.update_prod_file(prop_dict)
+        """Set up method initialises an instance of Run_Scraper class 
+        and navigates to desired product category page after accepting cookies
+        and changing to the correct region for delivert if necessary (not in the UK)
+        """
+        cls.options = input("Please input your desired product category from [most wished for, best seller]: ")
+        cls.headless = input("True or False for Headless: ")
+        cls.scrap_1 = Run_Scraper(cls.options, "computer & accessories", cls.headless)
+        time.sleep(2)
+  
+        # We will test whether there are any null values for price that our scraper retrieves
+        # Convert the dict into a dataframe and check the price column has no NaNs by
+        # converting to type float (if NaN value would be string N/A and
+        # hence will result in error)
+  
+        # initialize required arguments 
+        num_links = 4
+        # check region is Coventry after applying the change region method
+        self.scrap_1.driver.find_element(by=By.XPATH, value='//span[@class="nav-line-2 nav-progressive-content"]').text[:8] == 'Coventry'
+        prod_diction = self.scrap_1.collectdata(num_links)
+        # check for duplicates
+        dataframe = pd.DataFrame(prod_diction)
+        self.assertEqual(dataframe.duplicated().sum(), 0)
+        # check correct number of products scraped
+        self.assertEqual(len(prod_diction['Price']), num_links)
 
 ```
 ## Connecting and uploading to AWS S3 & PostgreSQL RDS
 
-In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads all the image files alongside the product json file. We use the os library to list out all the image files and then loop through them top upload the images to S3 one by one. Our next method, upload_dataframe_rds, asks the user to input the password and endpoint to connect to the AWS RDS database and then converts the dataframe obtained from a previous method to SQL and uploads to RDS which is connected to pgadmin.The name of the dataframe is based on the options attribute of the Amazon Scraper.
+In this milestone, we add two additional methods to our scraper class where the upload_to_cloud method connects to S3 using Boto3, creates a bucket and uploads all the image files alongside the product json file. We use the os library to list out all the image files and then loop through them top upload the images to S3 one by one. Our next method, upload_dataframe_rds, gets input such as the bucket name or aws endpoint from the .env file and connects to the AWS RDS database and then converts the dataframe obtained from the previous class method to SQL and uploads and appends any additional product data to the dataframe uploaded in RDS previously via pgadmin.The name of the dataframe is based on the options attribute of the Amazon Scraper.
 
-When connecting to RDS and S3, to keep the credentials private, we ask the user to input these as shown below. Below are the code snippets of how the files are uploaded to RDS and S3:
+When connecting to RDS and S3, to keep the credentials private, we use environment variables. Below are the code snippets of how the files are uploaded to RDS and S3:
 
 
 ```python
 # S3
-key_id = input('Enter your AWS key id: ')
-secret_key = input('Enter your AWS secret key: ')
-bucket_name = input('Enter your bucket name: ')
-region = input('Enter your regions: ')
+key_id = os.getenv('key_id')
+secret_key = os.getenv('secret_key')
+bucket_name = os.getenv('bucket_name')
+region = os.getenv('region')
 
 s3 = boto3.client("s3", 
                 region_name=region, 
                 aws_access_key_id=key_id, 
                 aws_secret_access_key=secret_key)
 
-s3.upload_file('raw_data/data.json', bucket_name, 'raw_data/data.json')
 
-for i in os.listdir('raw_data/images_'+self.options): # We list out all the image files and loop to upload the files to S3 one by one
-    s3.upload_file('raw_data/images_'+self.options+'/'+i, bucket_name, 'raw_data/images_'+self.options+'/'+i)
+s3.upload_file('data.json', bucket_name, 
+                'raw_data/data.json')
+
+for i in os.listdir('images_'+self.options): 
+    # We list out all the image files and loop to upload the files 
+    # to S3 one by one
+    s3.upload_file('images_'+self.options+'/'+i, 
+            bucket_name, 'raw_data/images_'+self.options+'/'+i)
     
 # RDS
+PASSWORD = os.getenv('password')
+# Your AWS endpoint
+ENDPOINT = os.getenv('endpoint')
 engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{ENDPOINT}:{PORT}/{DATABASE}")
 conn = engine.connect()
-empty = input("Do you want to overwrite the previous SQL data in RDS: ")
-if empty.lower() == 'yes':
-    if self.options == 'most wished for':
-        df.to_sql("most_wished_for", conn, if_exists='replace', chunksize=60) # We have defined engine globally previously
-    else:
-        df.to_sql("best_seller", conn, if_exists='replace', chunksize=60)
+
+if self.options == 'most wished for':
+    df.to_sql("most_wished_for", conn, if_exists='append', 
+                chunksize=60) 
+# We have defined engine globally previously
+else:
+    df.to_sql("best_seller", conn, if_exists='append', 
+                chunksize=60)
 
   
 ```
@@ -196,27 +211,24 @@ self.driver.get(url)
 
 # We check whether record exists in the SQL database connected with AWS RDS
 
-prod_id_most_wished_for = pd.DataFrame(conn.execute('''SELECT "Unique Product ID" FROM most_wished_for'''))
-prod_id_best_seller = pd.DataFrame(conn.execute('''SELECT "Unique Product ID" FROM best_seller'''))
+engine = self._engine_func()
+global conn
+conn = engine.connect()
+if self.options == 'most wished for':
+    try:
+        query_wish = '''SELECT "Unique Product ID" FROM most_wished_for'''
+        prod_id_most_wished_for = pd.DataFrame(conn.execute(query_wish))
+    except:
+        print("No data present in pgadmin")
+        prod_id_most_wished_for = pd.DataFrame(prop_dict)
 
-if self.unique_id_gen(link) in prop_dict['Unique Product ID']: # This prevents rescraping if the product id is already scraped and added to the dict
-    if self.options == 'most wished for':
-        s = prod_id_most_wished_for['Unique Product ID'].str.contains(self.unique_id_gen(link)).sum() # There should only be one unique link
-        if s == 1:
-            print('Already scraped this product')
-            continue
-        elif s == 0:
-            print('This record does not exist in the SQL data in AWS RDS & PgAdmin')
-            pass
-    else:
-        s = prod_id_best_seller['Unique Product ID'].str.contains(self.unique_id_gen(link)).sum()
-        if s == 1: # There should only be one unique link
-            print('Already scraped this product')
-            continue
-
-        elif s == 0:
-            print('This record does not exist in the SQL data in AWS RDS & PgAdmin')
-            pass
+else:
+    try:
+        query_best = '''SELECT "Unique Product ID" FROM best_seller'''
+        prod_id_best_seller = pd.DataFrame(conn.execute(query_best))
+    except:
+        print("No data present in pgadmin")
+        prod_id_best_seller = pd.DataFrame(prop_dict)
 
 ```
 
