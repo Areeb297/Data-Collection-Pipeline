@@ -1,6 +1,6 @@
 # Data-Collection-Pipeline
 
-This amazon scraper pipeline is designed to collect both structured and unstructured data https://www.amazon.co.uk/ where the webscraper regularly gives you an updated dataframe of the best sellers or most wished for categories in the Computer & Accessories product section. With further work to this project, we can add further product sections to be scraped in the future.
+This amazon scraper pipeline is designed to collect both structured and unstructured data https://www.amazon.co.uk/ where the webscraper regularly gives you an updated dataframe of the best sellers or most wished for categories in the Computer & Accessories product section. With further work to this project, we can add further product sections which can be specified in the .env file to be scraped in the future.
 
 ## Project Outline
 
