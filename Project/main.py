@@ -11,7 +11,7 @@ from typing import Union
 import boto3
 from sqlalchemy import create_engine 
 
-from Project.scraper_module_1 import AmazonUKScraper
+from scraper_module_1 import AmazonUKScraper
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -315,7 +315,7 @@ class Run_Scraper():
 if __name__ == '__main__':
 
     choices = os.getenv('options')
-    scraper = Run_Scraper(choices, "computer & accessories", headless=True)
+    scraper = Run_Scraper(choices, "computer & accessories", headless=False)
     prod_diction = scraper.collectdata(os.getenv('n'))
     scraper.dump_json_image_upload(prod_diction)
     scraper.driver.quit()

@@ -154,26 +154,12 @@ class AmazonUKScraper():
             a html container
 
         """
-        try:
-            time.sleep(1)
-            next_button = self.driver.find_element(by=By.XPATH, value='//li[@class="a-last"]')
-            next_button.location_once_scrolled_into_view   # Scrolls and waits until the next button appears in view to the scraper
-            time.sleep(1)
-            prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="p13n-gridRow _cDEzb_grid-row_3Cywl"]')
-            prop_list = prop_container.find_elements(by=By.XPATH, value='./div[@id="gridItemRoot"]')
-
-        except NoSuchElementException:
-            time.sleep(1)
-            previous_button = self.driver.find_element(by=By.XPATH, value='//li[@class="a-normal"]')
-            time.sleep(1)
-            # As the Next button is not visible/clickable anymore due it being the last page, we search for the previous button
-            # Until that button is displayed, we keep scrolling to display all products on that given page
-            previous_button.location_once_scrolled_into_view # Ensure all products are displayed
-            time.sleep(1)
-            prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="p13n-gridRow _cDEzb_grid-row_3Cywl"]')
-            prop_list = prop_container.find_elements(by=By.XPATH, value='./div[@id="gridItemRoot"]')
-
-
+        time.sleep(1)
+        page_button = self.driver.find_element(by=By.XPATH, value='//li[@class="a-normal"]')
+        page_button.location_once_scrolled_into_view   # Scrolls and waits until the bottom page button appears in view to the scraper
+        time.sleep(1)
+        prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="p13n-gridRow _cDEzb_grid-row_3Cywl"]')
+        prop_list = prop_container.find_elements(by=By.XPATH, value='./div[@id="gridItemRoot"]')
 
         return prop_list
 
